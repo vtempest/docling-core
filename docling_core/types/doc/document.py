@@ -3494,18 +3494,25 @@ class DoclingDocument(BaseModel):
                 else:
                     # For everything else, treat as text
                     text_content = extract_inner_text(full_chunk)
+                    element_prov = (
+                        ProvenanceItem(
+                            bbox=bbox.resize_by_scale(pg_width, pg_height),
+                            charspan=(0, len(text_content)),
+                            page_no=page_no,
+                        )
+                        if bbox
+                        else None
+                    )
+
+                    content_layer = ContentLayer.BODY
+                    if tag_name in [DocItemLabel.PAGE_HEADER, DocItemLabel.PAGE_FOOTER]:
+                        content_layer = ContentLayer.FURNITURE
+
                     self.add_text(
                         label=doc_label,
                         text=text_content,
-                        prov=(
-                            ProvenanceItem(
-                                bbox=bbox.resize_by_scale(pg_width, pg_height),
-                                charspan=(0, len(text_content)),
-                                page_no=page_no,
-                            )
-                            if bbox
-                            else None
-                        ),
+                        prov=element_prov,
+                        content_layer=content_layer,
                     )
         return self
 
