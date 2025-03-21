@@ -962,7 +962,7 @@ class PictureItem(FloatingItem):
             )
 
         serializer = MarkdownDocSerializer(
-            doc=self,
+            doc=doc,
             params=MarkdownParams(
                 image_mode=image_mode,
                 image_placeholder=image_placeholder,
