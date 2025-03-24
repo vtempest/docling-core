@@ -79,6 +79,7 @@ DEFAULT_EXPORT_LABELS = {
     DocItemLabel.REFERENCE,
     DocItemLabel.PAGE_HEADER,
     DocItemLabel.PAGE_FOOTER,
+    DocItemLabel.KEY_VALUE_REGION,
 }
 
 DOCUMENT_TOKENS_EXPORT_LABELS = DEFAULT_EXPORT_LABELS.copy()
@@ -644,7 +645,7 @@ class DocItem(
     def get_location_tokens(
         self,
         doc: "DoclingDocument",
-        new_line: str,
+        new_line: str = "",  # deprecated
         xsize: int = 500,
         ysize: int = 500,
     ) -> str:
@@ -663,7 +664,7 @@ class DocItem(
                 xsize=xsize,
                 ysize=ysize,
             )
-            location += f"{loc_str}{new_line}"
+            location += loc_str
 
         return location
 
@@ -726,7 +727,7 @@ class TextItem(DocItem):
     def export_to_document_tokens(
         self,
         doc: "DoclingDocument",
-        new_line: str = "",
+        new_line: str = "",  # deprecated
         xsize: int = 500,
         ysize: int = 500,
         add_location: bool = True,
@@ -735,7 +736,7 @@ class TextItem(DocItem):
         r"""Export text element to document tokens format.
 
         :param doc: "DoclingDocument":
-        :param new_line: str (Default value = "")
+        :param new_line: str (Default value = "")  Deprecated
         :param xsize: int:  (Default value = 500)
         :param ysize: int:  (Default value = 500)
         :param add_location: bool:  (Default value = True)
@@ -750,7 +751,6 @@ class TextItem(DocItem):
         serializer = DocTagsDocSerializer(
             doc=doc,
             params=DocTagsParams(
-                new_line=new_line,
                 xsize=xsize,
                 ysize=ysize,
                 add_location=add_location,
@@ -780,7 +780,7 @@ class SectionHeaderItem(TextItem):
     def export_to_document_tokens(
         self,
         doc: "DoclingDocument",
-        new_line: str = "",
+        new_line: str = "",  # deprecated
         xsize: int = 500,
         ysize: int = 500,
         add_location: bool = True,
@@ -789,7 +789,7 @@ class SectionHeaderItem(TextItem):
         r"""Export text element to document tokens format.
 
         :param doc: "DoclingDocument":
-        :param new_line: str (Default value = "")
+        :param new_line: str (Default value = "")  Deprecated
         :param xsize: int:  (Default value = 500)
         :param ysize: int:  (Default value = 500)
         :param add_location: bool:  (Default value = True)
@@ -804,7 +804,6 @@ class SectionHeaderItem(TextItem):
         serializer = DocTagsDocSerializer(
             doc=doc,
             params=DocTagsParams(
-                new_line=new_line,
                 xsize=xsize,
                 ysize=ysize,
                 add_location=add_location,
@@ -866,7 +865,7 @@ class CodeItem(FloatingItem, TextItem):
     def export_to_document_tokens(
         self,
         doc: "DoclingDocument",
-        new_line: str = "",
+        new_line: str = "",  # deprecated
         xsize: int = 500,
         ysize: int = 500,
         add_location: bool = True,
@@ -875,7 +874,7 @@ class CodeItem(FloatingItem, TextItem):
         r"""Export text element to document tokens format.
 
         :param doc: "DoclingDocument":
-        :param new_line: str (Default value = "")
+        :param new_line: str (Default value = "")  Deprecated
         :param xsize: int:  (Default value = 500)
         :param ysize: int:  (Default value = 500)
         :param add_location: bool:  (Default value = True)
@@ -890,7 +889,6 @@ class CodeItem(FloatingItem, TextItem):
         serializer = DocTagsDocSerializer(
             doc=doc,
             params=DocTagsParams(
-                new_line=new_line,
                 xsize=xsize,
                 ysize=ysize,
                 add_location=add_location,
@@ -1031,7 +1029,7 @@ class PictureItem(FloatingItem):
     def export_to_document_tokens(
         self,
         doc: "DoclingDocument",
-        new_line: str = "",
+        new_line: str = "",  # deprecated
         xsize: int = 500,
         ysize: int = 500,
         add_location: bool = True,
@@ -1041,7 +1039,7 @@ class PictureItem(FloatingItem):
         r"""Export picture to document tokens format.
 
         :param doc: "DoclingDocument":
-        :param new_line: str (Default value = "")
+        :param new_line: str (Default value = "")  Deprecated
         :param xsize: int:  (Default value = 500)
         :param ysize: int:  (Default value = 500)
         :param add_location: bool:  (Default value = True)
@@ -1058,7 +1056,6 @@ class PictureItem(FloatingItem):
         serializer = DocTagsDocSerializer(
             doc=doc,
             params=DocTagsParams(
-                new_line=new_line,
                 xsize=xsize,
                 ysize=ysize,
                 add_location=add_location,
@@ -1344,7 +1341,7 @@ class TableItem(FloatingItem):
     def export_to_document_tokens(
         self,
         doc: "DoclingDocument",
-        new_line: str = "",
+        new_line: str = "",  # deprecated
         xsize: int = 500,
         ysize: int = 500,
         add_location: bool = True,
@@ -1355,7 +1352,7 @@ class TableItem(FloatingItem):
         r"""Export table to document tokens format.
 
         :param doc: "DoclingDocument":
-        :param new_line: str (Default value = "")
+        :param new_line: str (Default value = "")  Deprecated
         :param xsize: int:  (Default value = 500)
         :param ysize: int:  (Default value = 500)
         :param add_location: bool:  (Default value = True)
@@ -1372,7 +1369,6 @@ class TableItem(FloatingItem):
         serializer = DocTagsDocSerializer(
             doc=doc,
             params=DocTagsParams(
-                new_line=new_line,
                 xsize=xsize,
                 ysize=ysize,
                 add_location=add_location,
@@ -1443,6 +1439,42 @@ class KeyValueItem(FloatingItem):
     label: typing.Literal[DocItemLabel.KEY_VALUE_REGION] = DocItemLabel.KEY_VALUE_REGION
 
     graph: GraphData
+
+    def export_to_document_tokens(
+        self,
+        doc: "DoclingDocument",
+        new_line: str = "",  # deprecated
+        xsize: int = 500,
+        ysize: int = 500,
+        add_location: bool = True,
+        add_content: bool = True,
+    ):
+        r"""Export key value item to document tokens format.
+
+        :param doc: "DoclingDocument":
+        :param new_line: str (Default value = "")  Deprecated
+        :param xsize: int:  (Default value = 500)
+        :param ysize: int:  (Default value = 500)
+        :param add_location: bool:  (Default value = True)
+        :param add_content: bool:  (Default value = True)
+
+        """
+        from docling_core.experimental.serializer.doctags import (
+            DocTagsDocSerializer,
+            DocTagsParams,
+        )
+
+        serializer = DocTagsDocSerializer(
+            doc=doc,
+            params=DocTagsParams(
+                xsize=xsize,
+                ysize=ysize,
+                add_location=add_location,
+                add_content=add_content,
+            ),
+        )
+        text = serializer.serialize(item=self).text
+        return text
 
 
 class FormItem(FloatingItem):
@@ -3507,7 +3539,7 @@ class DoclingDocument(BaseModel):
 
     def export_to_document_tokens(  # noqa: C901
         self,
-        delim: str = "",
+        delim: str = "",  # deprecated
         from_element: int = 0,
         to_element: int = sys.maxsize,
         labels: set[DocItemLabel] = DOCUMENT_TOKENS_EXPORT_LABELS,
@@ -3525,7 +3557,7 @@ class DoclingDocument(BaseModel):
         Operates on a slice of the document's body as defined through arguments
         from_element and to_element; defaulting to the whole main_text.
 
-        :param delim: str:  (Default value = "")
+        :param delim: str:  (Default value = "")  Deprecated
         :param from_element: int:  (Default value = 0)
         :param to_element: Optional[int]:  (Default value = None)
         :param labels: set[DocItemLabel]
@@ -3551,7 +3583,6 @@ class DoclingDocument(BaseModel):
                 # layers=...,  # not exposed
                 start_idx=from_element,
                 stop_idx=to_element,
-                new_line=delim,
                 xsize=xsize,
                 ysize=ysize,
                 add_location=add_location,
