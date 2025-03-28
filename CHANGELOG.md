@@ -1,3 +1,9 @@
+## [v2.24.1](https://github.com/docling-project/docling-core/releases/tag/v2.24.1) - 2025-03-28
+
+### Fix
+
+* Automatic transformation of output cells bbox coord origin defined by input in get_cells_in_bbox ([#219](https://github.com/docling-project/docling-core/issues/219)) ([`8e0e9b7`](https://github.com/docling-project/docling-core/commit/8e0e9b72bf04fe4605ccfcbb1ec463e5fce87694))
+
 ## [v2.24.0](https://github.com/docling-project/docling-core/releases/tag/v2.24.0) - 2025-03-25
 
 ### Feature
