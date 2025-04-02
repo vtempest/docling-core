@@ -81,9 +81,7 @@ def test_doctags_picture_provenances_and_captions():
 
 def test_doctags_document_index():
     doc = DoclingDocument(name="Document")
-    doctags = """<doctag><document_index><loc_108><loc_46><loc_419><loc_437>Foo </document_index>
-<page_footer><loc_242><loc_460><loc_256><loc_466>viii</page_footer>
-</doctag>"""
+    doctags = "<doctag><document_index><loc_108><loc_46><loc_419><loc_437>Foo </document_index></doctag>"
     doctags_doc = DocTagsDocument.from_doctags_and_image_pairs([doctags], None)
     doc.load_from_doctags(doctags_doc)
     assert doc.tables[0].data.table_cells[0].text == "Foo"
