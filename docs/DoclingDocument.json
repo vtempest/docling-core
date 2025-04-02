@@ -358,10 +358,11 @@
       "type": "string"
     },
     "ContentLayer": {
-      "description": "ContentLayer.",
+      "description": "Values representing distinct parts of a document layout.\n\nThe `body` layer consists of main items representing the content of the document,\nsuch as paragraphs, tables, images or headers, while the `furniture` layer\nincludes other items like page headers of footnotes. The `annotation` layer holds\nadditional, generated information that complements or annotates the content.",
       "enum": [
         "body",
-        "furniture"
+        "furniture",
+        "annotation"
       ],
       "title": "ContentLayer",
       "type": "string"

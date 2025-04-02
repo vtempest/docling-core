@@ -622,10 +622,17 @@ class ProvenanceItem(BaseModel):
 
 
 class ContentLayer(str, Enum):
-    """ContentLayer."""
+    """Values representing distinct parts of a document layout.
+
+    The `body` layer consists of main items representing the content of the document,
+    such as paragraphs, tables, images or headers, while the `furniture` layer
+    includes other items like page headers of footnotes. The `annotation` layer holds
+    additional, generated information that complements or annotates the content.
+    """
 
     BODY = "body"
     FURNITURE = "furniture"
+    ANNOTATION = "annotation"
 
 
 DEFAULT_CONTENT_LAYERS = {ContentLayer.BODY}
