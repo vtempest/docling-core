@@ -43,6 +43,7 @@ from docling_core.types.doc.document import (
     NodeItem,
     OrderedList,
     PictureItem,
+    PictureTabularChartData,
     SectionHeaderItem,
     TableItem,
     TextItem,
@@ -57,6 +58,7 @@ class MarkdownParams(CommonParams):
     layers: set[ContentLayer] = {ContentLayer.BODY}
     image_mode: ImageRefMode = ImageRefMode.PLACEHOLDER
     image_placeholder: str = "<!-- image -->"
+    enable_chart_tables: bool = True
     indent: int = 4
     wrap_width: Optional[PositiveInt] = None
     page_break_placeholder: Optional[str] = None  # e.g. "<!-- page break -->"
@@ -206,6 +208,21 @@ class MarkdownPictureSerializer(BasePictureSerializer):
             if img_res.text:
                 texts.append(img_res.text)
 
+        if params.enable_chart_tables:
+            # Check if picture has attached PictureTabularChartData
+            tabular_chart_annotations = [
+                ann
+                for ann in item.annotations
+                if isinstance(ann, PictureTabularChartData)
+            ]
+            if len(tabular_chart_annotations) > 0:
+                temp_doc = DoclingDocument(name="temp")
+                temp_table = temp_doc.add_table(
+                    data=tabular_chart_annotations[0].chart_data
+                )
+                md_table_content = temp_table.export_to_markdown(temp_doc)
+                if len(md_table_content) > 0:
+                    texts.append(md_table_content)
         text_res = "\n\n".join(texts)
 
         return SerializationResult(text=text_res)
