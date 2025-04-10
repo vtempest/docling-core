@@ -376,6 +376,57 @@
       "title": "CoordOrigin",
       "type": "string"
     },
+    "DocQaItem": {
+      "additionalProperties": false,
+      "description": "The representation of a question and answer pair or conversation on a document.\n\nAttributes:\n    context: A reference to a document context.\n    conversation: A list of question and answer pairs.",
+      "properties": {
+        "self_ref": {
+          "pattern": "^#(?:/([\\w-]+)(?:/(\\d+))?)?$",
+          "title": "Self Ref",
+          "type": "string"
+        },
+        "parent": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RefItem"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "children": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/RefItem"
+          },
+          "title": "Children",
+          "type": "array"
+        },
+        "content_layer": {
+          "$ref": "#/$defs/ContentLayer",
+          "default": "body"
+        },
+        "context": {
+          "$ref": "#/$defs/RefItem"
+        },
+        "conversation": {
+          "items": {
+            "$ref": "#/$defs/QA"
+          },
+          "title": "Conversation",
+          "type": "array"
+        }
+      },
+      "required": [
+        "self_ref",
+        "context",
+        "conversation"
+      ],
+      "title": "DocQaItem",
+      "type": "object"
+    },
     "DocumentOrigin": {
       "description": "FileSource.",
       "properties": {
@@ -1698,6 +1749,83 @@
       "title": "ProvenanceItem",
       "type": "object"
     },
+    "QA": {
+      "description": "The representation of a question and answer pair.\n\nTODO: create TypeVar for evidence\n\nAttributes:\n    question: The question in natural language\n    answer: The answer to the question\n    position: Whether the question is asked before or after the context.\n    evidence: The evidence for the answer within the context.",
+      "properties": {
+        "question": {
+          "title": "Question",
+          "type": "string"
+        },
+        "answer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Answer"
+        },
+        "position": {
+          "$ref": "#/$defs/QuestionContext",
+          "default": "BEFORE"
+        },
+        "evidence": {
+          "anyOf": [
+            {
+              "items": {
+                "anyOf": [
+                  {
+                    "maxItems": 2,
+                    "minItems": 2,
+                    "prefixItems": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "integer"
+                      }
+                    ],
+                    "type": "array"
+                  },
+                  {
+                    "$ref": "#/$defs/BoundingBox"
+                  },
+                  {
+                    "items": {
+                      "$ref": "#/$defs/TableCell"
+                    },
+                    "type": "array"
+                  }
+                ]
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evidence"
+        }
+      },
+      "required": [
+        "question"
+      ],
+      "title": "QA",
+      "type": "object"
+    },
+    "QuestionContext": {
+      "description": "Position of the question with respect to a context in question-answering.",
+      "enum": [
+        "BEFORE",
+        "AFTER"
+      ],
+      "title": "QuestionContext",
+      "type": "string"
+    },
     "RefItem": {
       "description": "RefItem.",
       "properties": {
@@ -2394,6 +2522,14 @@
         "$ref": "#/$defs/FormItem"
       },
       "title": "Form Items",
+      "type": "array"
+    },
+    "annotations": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/DocQaItem"
+      },
+      "title": "Annotations",
       "type": "array"
     },
     "pages": {

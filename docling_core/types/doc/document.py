@@ -42,7 +42,7 @@ from typing_extensions import Annotated, Self, deprecated
 from docling_core.search.package import VERSION_PATTERN
 from docling_core.types.base import _JSON_POINTER_REGEX
 from docling_core.types.doc import BoundingBox, Size
-from docling_core.types.doc.base import ImageRefMode
+from docling_core.types.doc.base import ImageRefMode, QuestionContext
 from docling_core.types.doc.labels import (
     CodeLanguageLabel,
     DocItemLabel,
@@ -1601,6 +1601,77 @@ class GraphData(BaseModel):
         return links
 
 
+class QA(BaseModel):
+    """The representation of a question and answer pair.
+
+    TODO: create TypeVar for evidence
+
+    Attributes:
+        question: The question in natural language
+        answer: The answer to the question
+        position: Whether the question is asked before or after the context.
+        evidence: The evidence for the answer within the context.
+    """
+
+    question: str
+    answer: Optional[str] = None
+    position: QuestionContext = QuestionContext.BEFORE
+    evidence: Optional[list[Union[tuple[int, int], BoundingBox, list[TableCell]]]] = (
+        None
+    )
+
+
+class DocQaItem(NodeItem):
+    """The representation of a question and answer pair or conversation on a document.
+
+    Attributes:
+        context: A reference to a document context.
+        conversation: A list of question and answer pairs.
+    """
+
+    context: RefItem
+    conversation: list[QA]
+
+    def export_to_llava(
+        self,
+        doc: "DoclingDocument",
+    ) -> dict:
+        """Exports the document question answering into LLaVA dataset compatible format.
+
+        TODO: define a LlaVA pydantic model.
+        TODO: review id and image values.
+
+        Args:
+            doc: The reference document.
+
+        Returns:
+            A dictionary representing the document question answering in LlaVA dataset
+            compatible format.
+        """
+        llava: dict = {}
+        item = self.context.resolve(doc)
+        if not isinstance(item, PictureItem) or not item.image:
+            return llava
+
+        llava["id"] = hashlib.sha256(str(item.image.uri).encode()).hexdigest()
+        llava["image"] = (
+            item.image.uri.name if isinstance(item.image.uri, Path) else item.image.uri
+        )
+        llava["conversations"] = []
+        for pair in self.conversation:
+            text = (
+                f"{pair.question}\n<image>"
+                if pair.position == QuestionContext.BEFORE
+                else f"<image>\n{pair.question}"
+            )
+            question: dict = {"from": "human", "value": text}
+            answer: dict = {"from": "gpt", "value": pair.answer}
+            llava["conversations"].append(question)
+            llava["conversations"].append(answer)
+
+        return llava
+
+
 class KeyValueItem(FloatingItem):
     """KeyValueItem."""
 
@@ -1779,6 +1850,7 @@ class DoclingDocument(BaseModel):
     tables: list[TableItem] = []
     key_value_items: list[KeyValueItem] = []
     form_items: list[FormItem] = []
+    annotations: list[Union[DocQaItem]] = []
 
     pages: dict[int, PageItem] = {}  # empty as default
 
@@ -1956,6 +2028,18 @@ class DoclingDocument(BaseModel):
             item.parent = parent_ref
 
             self.form_items.append(item)
+
+        elif isinstance(item, DocQaItem):
+            item_label = "annotations"
+            item_index = len(self.annotations)
+
+            cref = f"#/{item_label}/{item_index}"
+
+            item.self_ref = cref
+            item.parent = parent_ref
+
+            self.annotations.append(item)
+
         else:
             raise ValueError(f"Item {item} is not supported for insertion")
 
@@ -2769,6 +2853,44 @@ class DoclingDocument(BaseModel):
         parent.children.append(RefItem(cref=cref))
 
         return form_item
+
+    def add_doc_qa(
+        self,
+        context: DocItem,
+        conversation: list[QA],
+        parent: Optional[NodeItem] = None,
+    ):
+        """Add a document question and answer as annotation.
+
+        TODO: set the parent as the context?
+        TODO: add provenance?
+
+        Args:
+            context: _description_
+            conversation: _description_
+            prov: _description_. Defaults to None.
+            parent: _description_. Defaults to None.
+
+        Returns:
+            The document question and answer item.
+        """
+        if not parent:
+            parent = self.body
+
+        doc_qa_index = len(self.annotations)
+        cref = f"#/annotations/{doc_qa_index}"
+
+        doc_qa_item = DocQaItem(
+            context=context.get_ref(),
+            conversation=conversation,
+            content_layer=ContentLayer.ANNOTATION,
+            self_ref=cref,
+            parent=parent.get_ref(),
+        )
+        self.annotations.append(doc_qa_item)
+        parent.children.append(RefItem(cref=cref))
+
+        return doc_qa_item
 
     def num_pages(self):
         """num_pages."""
