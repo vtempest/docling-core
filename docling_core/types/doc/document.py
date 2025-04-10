@@ -3,7 +3,6 @@
 import base64
 import copy
 import hashlib
-import html
 import itertools
 import json
 import logging
@@ -12,17 +11,12 @@ import os
 import re
 import sys
 import typing
-import warnings
 from enum import Enum
 from io import BytesIO
 from pathlib import Path
 from typing import Any, Dict, Final, List, Literal, Optional, Tuple, Union
-from urllib.parse import quote, unquote
-from xml.etree.cElementTree import SubElement, tostring
-from xml.sax.saxutils import unescape
+from urllib.parse import unquote
 
-import latex2mathml.converter
-import latex2mathml.exceptions
 import pandas as pd
 import yaml
 from PIL import Image as PILImage
@@ -52,11 +46,7 @@ from docling_core.types.doc.labels import (
     PictureClassificationLabel,
 )
 from docling_core.types.doc.tokens import _LOC_PREFIX, DocumentToken, TableToken
-from docling_core.types.doc.utils import (
-    get_html_tag_with_text_direction,
-    get_text_direction,
-    relative_path,
-)
+from docling_core.types.doc.utils import relative_path
 
 _logger = logging.getLogger(__name__)
 
@@ -1128,54 +1118,19 @@ class PictureItem(FloatingItem):
         image_mode: ImageRefMode = ImageRefMode.PLACEHOLDER,
     ) -> str:
         """Export picture to HTML format."""
-        text = ""
-        if add_caption and len(self.captions):
-            text = self.caption_text(doc)
+        from docling_core.experimental.serializer.html import (
+            HTMLDocSerializer,
+            HTMLParams,
+        )
 
-        caption_text = ""
-        if len(text) > 0:
-            caption_text = get_html_tag_with_text_direction(
-                html_tag="figcaption", text=text
-            )
-
-        default_response = f"<figure>{caption_text}</figure>"
-
-        if image_mode == ImageRefMode.PLACEHOLDER:
-            return default_response
-
-        elif image_mode == ImageRefMode.EMBEDDED:
-            # short-cut: we already have the image in base64
-            if (
-                isinstance(self.image, ImageRef)
-                and isinstance(self.image.uri, AnyUrl)
-                and self.image.uri.scheme == "data"
-            ):
-                img_text = f'<img src="{self.image.uri}">'
-                return f"<figure>{caption_text}{img_text}</figure>"
-
-            # get the self.image._pil or crop it out of the page-image
-            img = self.get_image(doc)
-
-            if img is not None:
-                imgb64 = self._image_to_base64(img)
-                img_text = f'<img src="data:image/png;base64,{imgb64}">'
-
-                return f"<figure>{caption_text}{img_text}</figure>"
-            else:
-                return default_response
-
-        elif image_mode == ImageRefMode.REFERENCED:
-
-            if not isinstance(self.image, ImageRef) or (
-                isinstance(self.image.uri, AnyUrl) and self.image.uri.scheme == "data"
-            ):
-                return default_response
-
-            img_text = f'<img src="{quote(str(self.image.uri))}">'
-            return f"<figure>{caption_text}{img_text}</figure>"
-
-        else:
-            return default_response
+        serializer = HTMLDocSerializer(
+            doc=doc,
+            params=HTMLParams(
+                image_mode=image_mode,
+            ),
+        )
+        text = serializer.serialize(item=self).text
+        return text
 
     @deprecated("Use export_to_doctags() instead.")
     def export_to_document_tokens(self, *args, **kwargs):
@@ -1326,81 +1281,18 @@ class TableItem(FloatingItem):
         add_caption: bool = True,
     ) -> str:
         """Export the table as html."""
-        if doc is None:
-            warnings.warn(
-                "The `doc` argument will be mandatory in a future version. "
-                "It must be provided to include a caption.",
-                DeprecationWarning,
-            )
+        if doc is not None:
+            from docling_core.experimental.serializer.html import HTMLDocSerializer
 
-        nrows = self.data.num_rows
-        ncols = self.data.num_cols
-
-        text = ""
-        if doc is not None and add_caption and len(self.captions):
-            text = html.escape(self.caption_text(doc))
-
-        if len(self.data.table_cells) == 0:
-            return ""
-
-        body = ""
-
-        for i in range(nrows):
-            body += "<tr>"
-            for j in range(ncols):
-                cell: TableCell = self.data.grid[i][j]
-
-                rowspan, rowstart = (
-                    cell.row_span,
-                    cell.start_row_offset_idx,
-                )
-                colspan, colstart = (
-                    cell.col_span,
-                    cell.start_col_offset_idx,
-                )
-
-                if rowstart != i:
-                    continue
-                if colstart != j:
-                    continue
-
-                content = html.escape(cell.text.strip())
-                celltag = "td"
-                if cell.column_header:
-                    celltag = "th"
-
-                opening_tag = f"{celltag}"
-                if rowspan > 1:
-                    opening_tag += f' rowspan="{rowspan}"'
-                if colspan > 1:
-                    opening_tag += f' colspan="{colspan}"'
-
-                text_dir = get_text_direction(content)
-                if text_dir == "rtl":
-                    opening_tag += f' dir="{dir}"'
-
-                body += f"<{opening_tag}>{content}</{celltag}>"
-            body += "</tr>"
-
-        # dir = get_text_direction(text)
-
-        if len(text) > 0 and len(body) > 0:
-            caption_text = get_html_tag_with_text_direction(
-                html_tag="caption", text=text
-            )
-            body = f"<table>{caption_text}<tbody>{body}</tbody></table>"
-
-        elif len(text) == 0 and len(body) > 0:
-            body = f"<table><tbody>{body}</tbody></table>"
-        elif len(text) > 0 and len(body) == 0:
-            caption_text = get_html_tag_with_text_direction(
-                html_tag="caption", text=text
-            )
-            body = f"<table>{caption_text}</table>"
+            serializer = HTMLDocSerializer(doc=doc)
+            text = serializer.serialize(item=self).text
+            return text
         else:
-            body = "<table></table>"
-
-        return body
+            _logger.error(
+                "Usage of TableItem.export_to_html() without `doc` argument is "
+                "deprecated.",
+            )
+            return ""
 
     def export_to_otsl(
         self,
@@ -1674,76 +1566,6 @@ class PageItem(BaseModel):
 
 class DoclingDocument(BaseModel):
     """DoclingDocument."""
-
-    _HTML_DEFAULT_HEAD: str = r"""<head>
-    <link rel="icon" type="image/png"
-    href="https://raw.githubusercontent.com/docling-project/docling/refs/heads/main/docs/assets/logo.svg"/>
-    <meta charset="UTF-8">
-    <title>
-    Powered by Docling
-    </title>
-    <style>
-    html {
-    background-color: LightGray;
-    }
-    body {
-    margin: 0 auto;
-    width:800px;
-    padding: 30px;
-    background-color: White;
-    font-family: Arial, sans-serif;
-    box-shadow: 10px 10px 10px grey;
-    }
-    figure{
-    display: block;
-    width: 100%;
-    margin: 0px;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    }
-    img {
-    display: block;
-    margin: auto;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    max-width: 640px;
-    max-height: 640px;
-    }
-    table {
-    min-width:500px;
-    background-color: White;
-    border-collapse: collapse;
-    cell-padding: 5px;
-    margin: auto;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    }
-    th, td {
-    border: 1px solid black;
-    padding: 8px;
-    }
-    th {
-    font-weight: bold;
-    }
-    table tr:nth-child(even) td{
-    background-color: LightGray;
-    }
-    math annotation {
-    display: none;
-    }
-    .formula-not-decoded {
-    background: repeating-linear-gradient(
-    45deg, /* Angle of the stripes */
-    LightGray, /* First color */
-    LightGray 10px, /* Length of the first color */
-    White 10px, /* Second color */
-    White 20px /* Length of the second color */
-    );
-    margin: 0;
-    text-align: center;
-    }
-    </style>
-    </head>"""
 
     schema_name: typing.Literal["DoclingDocument"] = "DoclingDocument"
     version: Annotated[str, StringConstraints(pattern=VERSION_PATTERN, strict=True)] = (
@@ -3249,12 +3071,14 @@ class DoclingDocument(BaseModel):
         formula_to_mathml: bool = True,
         page_no: Optional[int] = None,
         html_lang: str = "en",
-        html_head: str = _HTML_DEFAULT_HEAD,
+        html_head: str = "null",  # should be deprecated
         included_content_layers: Optional[set[ContentLayer]] = None,
+        split_page_view: bool = False,
     ):
         """Save to HTML."""
         if isinstance(filename, str):
             filename = Path(filename)
+
         artifacts_dir, reference_path = self._get_output_paths(filename, artifacts_dir)
 
         if image_mode == ImageRefMode.REFERENCED:
@@ -3274,6 +3098,7 @@ class DoclingDocument(BaseModel):
             html_lang=html_lang,
             html_head=html_head,
             included_content_layers=included_content_layers,
+            split_page_view=split_page_view,
         )
 
         with open(filename, "w", encoding="utf-8") as fw:
@@ -3322,245 +3147,46 @@ class DoclingDocument(BaseModel):
         formula_to_mathml: bool = True,
         page_no: Optional[int] = None,
         html_lang: str = "en",
-        html_head: str = _HTML_DEFAULT_HEAD,
+        html_head: str = "null",  # should be deprecated ...
         included_content_layers: Optional[set[ContentLayer]] = None,
+        split_page_view: bool = False,
     ) -> str:
         r"""Serialize to HTML."""
-        my_labels = labels if labels is not None else DEFAULT_EXPORT_LABELS
+        from docling_core.experimental.serializer.html import (
+            HTMLDocSerializer,
+            HTMLParams,
+        )
+
+        my_labels = labels if labels is not None else DOCUMENT_TOKENS_EXPORT_LABELS
         my_layers = (
             included_content_layers
             if included_content_layers is not None
             else DEFAULT_CONTENT_LAYERS
         )
 
-        def close_lists(
-            curr_level: int,
-            prev_level: int,
-            in_ordered_list: List[bool],
-            html_texts: list[str],
-        ):
+        params = HTMLParams(
+            labels=my_labels,
+            layers=my_layers,
+            pages={page_no} if page_no is not None else None,
+            start_idx=from_element,
+            stop_idx=to_element,
+            image_mode=image_mode,
+            formula_to_mathml=formula_to_mathml,
+            html_head=html_head,
+            html_lang=html_lang,
+            split_page_view=split_page_view,
+        )
 
-            if len(in_ordered_list) == 0:
-                return (in_ordered_list, html_texts)
+        if html_head == "null":
+            params.html_head = None
 
-            while curr_level < prev_level and len(in_ordered_list) > 0:
-                if in_ordered_list[-1]:
-                    html_texts.append("</ol>")
-                else:
-                    html_texts.append("</ul>")
+        serializer = HTMLDocSerializer(
+            doc=self,
+            params=params,
+        )
+        ser_res = serializer.serialize()
 
-                prev_level -= 1
-                in_ordered_list.pop()  # = in_ordered_list[:-1]
-
-            return (in_ordered_list, html_texts)
-
-        head_lines = [
-            "<!DOCTYPE html>",
-            f'<html lang="{html_lang}">',
-            html_head,
-        ]
-        html_texts: list[str] = []
-
-        prev_level = 0  # Track the previous item's level
-
-        in_ordered_list: List[bool] = []  # False
-
-        def _prepare_tag_content(
-            text: str, do_escape_html=True, do_replace_newline=True
-        ) -> str:
-            if do_escape_html:
-                text = html.escape(text, quote=False)
-            if do_replace_newline:
-                text = text.replace("\n", "<br>")
-            return text
-
-        for ix, (item, curr_level) in enumerate(
-            self.iterate_items(
-                self.body,
-                with_groups=True,
-                page_no=page_no,
-                included_content_layers=my_layers,
-            )
-        ):
-            # If we've moved to a lower level, we're exiting one or more groups
-            if curr_level < prev_level and len(in_ordered_list) > 0:
-                # Calculate how many levels we've exited
-                # level_difference = previous_level - level
-                # Decrement list_nesting_level for each list group we've exited
-                # list_nesting_level = max(0, list_nesting_level - level_difference)
-
-                in_ordered_list, html_texts = close_lists(
-                    curr_level=curr_level,
-                    prev_level=prev_level,
-                    in_ordered_list=in_ordered_list,
-                    html_texts=html_texts,
-                )
-
-            prev_level = curr_level  # Update previous_level for next iteration
-
-            if ix < from_element or to_element <= ix:
-                continue  # skip as many items as you want
-
-            if (isinstance(item, DocItem)) and (item.label not in my_labels):
-                continue  # skip any label that is not whitelisted
-
-            if isinstance(item, GroupItem) and item.label in [
-                GroupLabel.ORDERED_LIST,
-            ]:
-
-                text = "<ol>"
-                html_texts.append(text)
-
-                # Increment list nesting level when entering a new list
-                in_ordered_list.append(True)
-
-            elif isinstance(item, GroupItem) and item.label in [
-                GroupLabel.LIST,
-            ]:
-
-                text = "<ul>"
-                html_texts.append(text)
-
-                # Increment list nesting level when entering a new list
-                in_ordered_list.append(False)
-
-            elif isinstance(item, GroupItem):
-                continue
-
-            elif isinstance(item, TextItem) and item.label in [DocItemLabel.TITLE]:
-                text_inner = _prepare_tag_content(item.text)
-                text = get_html_tag_with_text_direction(html_tag="h1", text=text_inner)
-
-                html_texts.append(text)
-
-            elif isinstance(item, SectionHeaderItem):
-
-                section_level: int = min(item.level + 1, 6)
-
-                text = get_html_tag_with_text_direction(
-                    html_tag=f"h{section_level}",
-                    text=_prepare_tag_content(item.text),
-                )
-                html_texts.append(text)
-
-            elif isinstance(item, TextItem) and item.label in [DocItemLabel.FORMULA]:
-
-                math_formula = _prepare_tag_content(
-                    item.text, do_escape_html=False, do_replace_newline=False
-                )
-                text = ""
-
-                def _image_fallback(item: TextItem):
-                    item_image = item.get_image(doc=self)
-                    if item_image is not None:
-                        img_ref = ImageRef.from_pil(item_image, dpi=72)
-                        return (
-                            "<figure>"
-                            f'<img src="{img_ref.uri}" alt="{item.orig}" />'
-                            "</figure>"
-                        )
-
-                img_fallback = _image_fallback(item)
-
-                # If the formula is not processed correcty, use its image
-                if (
-                    item.text == ""
-                    and item.orig != ""
-                    and image_mode == ImageRefMode.EMBEDDED
-                    and len(item.prov) > 0
-                    and img_fallback is not None
-                ):
-                    text = img_fallback
-
-                # Building a math equation in MathML format
-                # ref https://www.w3.org/TR/wai-aria-1.1/#math
-                elif formula_to_mathml and len(math_formula) > 0:
-                    try:
-                        mathml_element = latex2mathml.converter.convert_to_element(
-                            math_formula, display="block"
-                        )
-                        annotation = SubElement(
-                            mathml_element, "annotation", dict(encoding="TeX")
-                        )
-                        annotation.text = math_formula
-                        mathml = unescape(tostring(mathml_element, encoding="unicode"))
-                        text = f"<div>{mathml}</div>"
-                    except Exception as err:
-                        _logger.warning(
-                            "Malformed formula cannot be rendered. "
-                            f"Error {err.__class__.__name__}, formula={math_formula}"
-                        )
-                        if (
-                            image_mode == ImageRefMode.EMBEDDED
-                            and len(item.prov) > 0
-                            and img_fallback is not None
-                        ):
-                            text = img_fallback
-                        else:
-                            text = f"<pre>{math_formula}</pre>"
-
-                elif math_formula != "":
-                    text = f"<pre>{math_formula}</pre>"
-
-                if text != "":
-                    html_texts.append(text)
-                else:
-                    html_texts.append(
-                        '<div class="formula-not-decoded">Formula not decoded</div>'
-                    )
-
-            elif isinstance(item, ListItem):
-                text = get_html_tag_with_text_direction(
-                    html_tag="li", text=_prepare_tag_content(item.text)
-                )
-                html_texts.append(text)
-
-            elif isinstance(item, TextItem) and item.label in [DocItemLabel.LIST_ITEM]:
-                text = get_html_tag_with_text_direction(
-                    html_tag="li", text=_prepare_tag_content(item.text)
-                )
-                html_texts.append(text)
-
-            elif isinstance(item, CodeItem):
-                code_text = _prepare_tag_content(
-                    item.text, do_escape_html=False, do_replace_newline=False
-                )
-                text = f"<pre><code>{code_text}</code></pre>"
-                html_texts.append(text)
-
-            elif isinstance(item, TextItem):
-
-                text = get_html_tag_with_text_direction(
-                    html_tag="p", text=_prepare_tag_content(item.text)
-                )
-                html_texts.append(text)
-
-            elif isinstance(item, TableItem):
-
-                text = item.export_to_html(doc=self, add_caption=True)
-                html_texts.append(text)
-
-            elif isinstance(item, PictureItem):
-
-                html_texts.append(
-                    item.export_to_html(
-                        doc=self, add_caption=True, image_mode=image_mode
-                    )
-                )
-
-            elif isinstance(item, DocItem) and item.label in my_labels:
-                continue
-
-        html_texts.append("</html>")
-
-        lines = []
-        lines.extend(head_lines)
-        lines.extend(html_texts)
-
-        delim = "\n"
-        html_text = (delim.join(lines)).strip()
-
-        return html_text
+        return ser_res.text
 
     def load_from_doctags(  # noqa: C901
         self,
