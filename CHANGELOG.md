@@ -1,3 +1,9 @@
+## [v2.26.1](https://github.com/docling-project/docling-core/releases/tag/v2.26.1) - 2025-04-11
+
+### Performance
+
+* Fix serialization performance ([#249](https://github.com/docling-project/docling-core/issues/249)) ([`98c60bb`](https://github.com/docling-project/docling-core/commit/98c60bb65b080d460c9d74c1332eb781f174ce5f))
+
 ## [v2.26.0](https://github.com/docling-project/docling-core/releases/tag/v2.26.0) - 2025-04-11
 
 ### Feature
