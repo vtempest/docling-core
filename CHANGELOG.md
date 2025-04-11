@@ -1,3 +1,26 @@
+## [v2.26.0](https://github.com/docling-project/docling-core/releases/tag/v2.26.0) - 2025-04-11
+
+### Feature
+
+* Add HTML serializer ([#232](https://github.com/docling-project/docling-core/issues/232)) ([`5d40600`](https://github.com/docling-project/docling-core/commit/5d406008f2f8afe3dbb70e97f3a70681ddeca057))
+* Add serializer provider to chunkers ([#239](https://github.com/docling-project/docling-core/issues/239)) ([`23036e1`](https://github.com/docling-project/docling-core/commit/23036e17fae03f99d123781dfe0c5229b1daf59c))
+* Integrate serialization API into chunkers ([#221](https://github.com/docling-project/docling-core/issues/221)) ([`5e4c0fd`](https://github.com/docling-project/docling-core/commit/5e4c0fd51fc410c4cd0f91e7566bfbdfc62b3695))
+* Expose page number in Serialization API ([#238](https://github.com/docling-project/docling-core/issues/238)) ([`73b9941`](https://github.com/docling-project/docling-core/commit/73b99410a9bc0c039cd557a76657c56b9342eb0b))
+* Markdown chart serializer (picture+table) ([#235](https://github.com/docling-project/docling-core/issues/235)) ([`0482bac`](https://github.com/docling-project/docling-core/commit/0482bacb5bd34051ea9f743ae968c2d12dba51fc))
+* Support of DocTags charts (serialization and deserialization) ([#229](https://github.com/docling-project/docling-core/issues/229)) ([`e9259a5`](https://github.com/docling-project/docling-core/commit/e9259a5f8778a4a8ab814a4f75b64e41a1b52946))
+* Added initial delete and insert methods in DoclingDocument ([#220](https://github.com/docling-project/docling-core/issues/220)) ([`f2fe1c1`](https://github.com/docling-project/docling-core/commit/f2fe1c1bc61159854af01e3dbad05690cf5a7a35))
+
+### Fix
+
+* Fix page filtering issue ([#247](https://github.com/docling-project/docling-core/issues/247)) ([`ab78e0b`](https://github.com/docling-project/docling-core/commit/ab78e0bd9ce2352c175c63f69e79ef9dbf0281b7))
+* Propagate HTMLOutputStyle properly through ([#246](https://github.com/docling-project/docling-core/issues/246)) ([`587e67f`](https://github.com/docling-project/docling-core/commit/587e67f423c2c7ed432bccd0e9b5c9dce8747f95))
+* Better `BoundingRectangle.angle` and `BoundingRectangle.angle_360` computation ([#237](https://github.com/docling-project/docling-core/issues/237)) ([`055742c`](https://github.com/docling-project/docling-core/commit/055742c2e809087562c39130345e33af10686169))
+* DocTags import location fix for tables, pictures, captions ([#227](https://github.com/docling-project/docling-core/issues/227)) ([`a055e1a`](https://github.com/docling-project/docling-core/commit/a055e1a9f0a80ccf78e070f0b2179fede73ccf71))
+
+### Performance
+
+* Accelerate span deduplication ([#248](https://github.com/docling-project/docling-core/issues/248)) ([`26f639d`](https://github.com/docling-project/docling-core/commit/26f639d8b833a049cb33490876698b669345ac44))
+
 ## [v2.25.0](https://github.com/docling-project/docling-core/releases/tag/v2.25.0) - 2025-03-31
 
 ### Feature
