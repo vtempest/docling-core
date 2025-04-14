@@ -1,3 +1,9 @@
+## [v2.26.4](https://github.com/docling-project/docling-core/releases/tag/v2.26.4) - 2025-04-14
+
+### Fix
+
+* Fix page breaking in case page starts with group ([#253](https://github.com/docling-project/docling-core/issues/253)) ([`928e5c5`](https://github.com/docling-project/docling-core/commit/928e5c504612f13a7ec5bc3381f81c581cb9691c))
+
 ## [v2.26.3](https://github.com/docling-project/docling-core/releases/tag/v2.26.3) - 2025-04-14
 
 ### Fix
