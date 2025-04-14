@@ -1,3 +1,9 @@
+## [v2.26.3](https://github.com/docling-project/docling-core/releases/tag/v2.26.3) - 2025-04-14
+
+### Fix
+
+* **deps:** Widen typer upper bound ([#252](https://github.com/docling-project/docling-core/issues/252)) ([`437aef0`](https://github.com/docling-project/docling-core/commit/437aef0a410dc3f501beafe02feb2857613f7b4f))
+
 ## [v2.26.2](https://github.com/docling-project/docling-core/releases/tag/v2.26.2) - 2025-04-14
 
 ### Fix
