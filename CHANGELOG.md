@@ -1,3 +1,9 @@
+## [v2.26.2](https://github.com/docling-project/docling-core/releases/tag/v2.26.2) - 2025-04-14
+
+### Fix
+
+* Fix code handling in HTML serialization ([#251](https://github.com/docling-project/docling-core/issues/251)) ([`15d2f2c`](https://github.com/docling-project/docling-core/commit/15d2f2c1d5df9c73bbe3d616a17f5e5000393c46))
+
 ## [v2.26.1](https://github.com/docling-project/docling-core/releases/tag/v2.26.1) - 2025-04-11
 
 ### Performance
