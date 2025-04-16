@@ -1,3 +1,15 @@
+## [v2.27.0](https://github.com/docling-project/docling-core/releases/tag/v2.27.0) - 2025-04-16
+
+### Feature
+
+* Chart tabular data serialization for HTML serializer ([#258](https://github.com/docling-project/docling-core/issues/258)) ([`caa8aee`](https://github.com/docling-project/docling-core/commit/caa8aeefae81b893cd38bcc4349fe7112bd0eb24))
+
+### Fix
+
+* HTML serialization for single image documents ([#261](https://github.com/docling-project/docling-core/issues/261)) ([`d0a49da`](https://github.com/docling-project/docling-core/commit/d0a49da6de0da65275c709316bcdecaebdb6b883))
+* **codecov:** Fix codecov argument and yaml file ([#260](https://github.com/docling-project/docling-core/issues/260)) ([`1af0721`](https://github.com/docling-project/docling-core/commit/1af07218e1496029693eb7dcebd6f4ac4451003d))
+* Safer label color API ([#259](https://github.com/docling-project/docling-core/issues/259)) ([`159f61d`](https://github.com/docling-project/docling-core/commit/159f61d6d8ce79d5dad1d47af729019c73c68d62))
+
 ## [v2.26.4](https://github.com/docling-project/docling-core/releases/tag/v2.26.4) - 2025-04-14
 
 ### Fix
