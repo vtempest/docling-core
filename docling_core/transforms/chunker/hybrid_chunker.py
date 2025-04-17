@@ -8,19 +8,19 @@
 import warnings
 from typing import Any, Iterable, Iterator, Optional, Union
 
-from pydantic import BaseModel, ConfigDict, PositiveInt, TypeAdapter, model_validator
-from typing_extensions import Self
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from docling_core.transforms.chunker.hierarchical_chunker import ChunkingDocSerializer
+from docling_core.transforms.chunker.tokenizer.base import BaseTokenizer
 
 try:
     import semchunk
-    import tiktoken
-    from transformers import AutoTokenizer, PreTrainedTokenizerBase
 except ImportError:
     raise RuntimeError(
-        "Module requires 'chunking' extra; to install, run: "
-        "`pip install 'docling-core[chunking]'`"
+        "Extra required by module: 'chunking' by default (or 'chunking-openai' if "
+        "specifically using OpenAI tokenization); to install, run: "
+        "`pip install 'docling-core[chunking]'` or "
+        "`pip install 'docling-core[chunking-openai]'`"
     )
 
 from docling_core.experimental.serializer.base import BaseDocSerializer
@@ -32,6 +32,16 @@ from docling_core.transforms.chunker import (
     HierarchicalChunker,
 )
 from docling_core.types import DoclingDocument
+
+
+def _get_default_tokenizer():
+    from docling_core.transforms.chunker.tokenizer.huggingface import (
+        HuggingFaceTokenizer,
+    )
+
+    return HuggingFaceTokenizer.from_pretrained(
+        model_name="sentence-transformers/all-MiniLM-L6-v2"
+    )
 
 
 class HybridChunker(BaseChunker):
@@ -47,36 +57,40 @@ class HybridChunker(BaseChunker):
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    tokenizer: Union[PreTrainedTokenizerBase, tiktoken.Encoding, str] = (
-        "sentence-transformers/all-MiniLM-L6-v2"
-    )
-    max_tokens: int = None  # type: ignore[assignment]
+    tokenizer: BaseTokenizer = Field(default_factory=_get_default_tokenizer)
     merge_peers: bool = True
 
     _inner_chunker: HierarchicalChunker = HierarchicalChunker()
 
-    @model_validator(mode="after")
-    def _patch_tokenizer_and_max_tokens(self) -> Self:
-        self._tokenizer = (
-            self.tokenizer
-            if isinstance(self.tokenizer, (PreTrainedTokenizerBase, tiktoken.Encoding))
-            else AutoTokenizer.from_pretrained(self.tokenizer)
-        )
-        if isinstance(self._tokenizer, PreTrainedTokenizerBase):
-            self._count_tokens = lambda text: len(self._tokenizer.tokenize(text))
-        else:
-            self._count_tokens = lambda text: len(self._tokenizer.encode(text))
-        if self.max_tokens is None:
-            if hasattr(self._tokenizer, "model_max_length"):
-                self.max_tokens = TypeAdapter(PositiveInt).validate_python(
-                    self._tokenizer.model_max_length
-                )
+    @model_validator(mode="before")
+    @classmethod
+    def _patch(cls, data: Any) -> Any:
+        if isinstance(data, dict) and (tokenizer := data.get("tokenizer")):
+            max_tokens = data.get("max_tokens")
+            if isinstance(tokenizer, BaseTokenizer):
+                pass
             else:
-                raise ValueError(
-                    "max_tokens must be provided when using a tokenizer "
-                    "(e.g. TikToken) without a 'model_max_length' attribute."
+                from docling_core.transforms.chunker.tokenizer.huggingface import (
+                    HuggingFaceTokenizer,
                 )
-        return self
+
+                if isinstance(tokenizer, str):
+                    data["tokenizer"] = HuggingFaceTokenizer.from_pretrained(
+                        model_name=tokenizer,
+                        max_tokens=max_tokens,
+                    )
+                else:
+                    # migrate previous HF-based tokenizers
+                    kwargs = {"tokenizer": tokenizer}
+                    if max_tokens is not None:
+                        kwargs["max_tokens"] = max_tokens
+                    data["tokenizer"] = HuggingFaceTokenizer(**kwargs)
+        return data
+
+    @property
+    def max_tokens(self) -> int:
+        """Get maximum number of tokens allowed."""
+        return self.tokenizer.get_max_tokens()
 
     def _count_text_tokens(self, text: Optional[Union[str, list[str]]]):
         if text is None:
@@ -86,7 +100,7 @@ class HybridChunker(BaseChunker):
             for t in text:
                 total += self._count_text_tokens(t)
             return total
-        return self._count_tokens(text)
+        return self.tokenizer.count_tokens(text=text)
 
     class _ChunkLengthInfo(BaseModel):
         total_len: int
@@ -95,7 +109,7 @@ class HybridChunker(BaseChunker):
 
     def _count_chunk_tokens(self, doc_chunk: DocChunk):
         ser_txt = self.contextualize(chunk=doc_chunk)
-        return self._count_tokens(ser_txt)
+        return self.tokenizer.count_tokens(text=ser_txt)
 
     def _doc_chunk_length(self, doc_chunk: DocChunk):
         text_length = self._count_text_tokens(doc_chunk.text)
@@ -192,7 +206,7 @@ class HybridChunker(BaseChunker):
             # captions:
             available_length = self.max_tokens - lengths.other_len
             sem_chunker = semchunk.chunkerify(
-                self._tokenizer, chunk_size=available_length
+                self.tokenizer.get_tokenizer(), chunk_size=available_length
             )
             if available_length <= 0:
                 warnings.warn(
