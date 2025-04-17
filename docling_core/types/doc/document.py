@@ -4044,6 +4044,28 @@ class DoclingDocument(BaseModel):
         self.pages[page_no] = pitem
         return pitem
 
+    def get_visualization(
+        self, show_label: bool = True
+    ) -> dict[Optional[int], PILImage.Image]:
+        """Get visualization of the document as images by page."""
+        from docling_core.transforms.visualizer.layout_visualizer import (
+            LayoutVisualizer,
+        )
+        from docling_core.transforms.visualizer.reading_order_visualizer import (
+            ReadingOrderVisualizer,
+        )
+
+        visualizer = ReadingOrderVisualizer(
+            base_visualizer=LayoutVisualizer(
+                params=LayoutVisualizer.Params(
+                    show_label=show_label,
+                ),
+            ),
+        )
+        images = visualizer.get_visualization(doc=self)
+
+        return images
+
     @field_validator("version")
     @classmethod
     def check_version_is_compatible(cls, v: str) -> str:
