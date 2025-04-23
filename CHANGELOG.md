@@ -1,3 +1,10 @@
+## [v2.28.0](https://github.com/docling-project/docling-core/releases/tag/v2.28.0) - 2025-04-23
+
+### Feature
+
+* Add tiktoken tokenizers support to HybridChunker ([#240](https://github.com/docling-project/docling-core/issues/240)) ([`763e136`](https://github.com/docling-project/docling-core/commit/763e1364ff0b95388696ccd3d69f150718012a3a))
+* Add visualizers ([#263](https://github.com/docling-project/docling-core/issues/263)) ([`a258d52`](https://github.com/docling-project/docling-core/commit/a258d525e13fe1112ff1f0590fe5f4462feab7ff))
+
 ## [v2.27.0](https://github.com/docling-project/docling-core/releases/tag/v2.27.0) - 2025-04-16
 
 ### Feature
