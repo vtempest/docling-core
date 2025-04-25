@@ -1,3 +1,10 @@
+## [v2.28.1](https://github.com/docling-project/docling-core/releases/tag/v2.28.1) - 2025-04-25
+
+### Fix
+
+* Visualization of document pages without items ([#271](https://github.com/docling-project/docling-core/issues/271)) ([`a947440`](https://github.com/docling-project/docling-core/commit/a94744054509df8ba450629e8276c335b3a4d902))
+* UnboundLocal variable ([#269](https://github.com/docling-project/docling-core/issues/269)) ([`d9709d0`](https://github.com/docling-project/docling-core/commit/d9709d0b124427e414abe8d7f7a3a89e649a7a44))
+
 ## [v2.28.0](https://github.com/docling-project/docling-core/releases/tag/v2.28.0) - 2025-04-23
 
 ### Feature
