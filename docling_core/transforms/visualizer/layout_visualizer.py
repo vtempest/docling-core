@@ -123,7 +123,21 @@ class LayoutVisualizer(BaseVisualizer):
     ):
         """Draw the document clusters and optionaly the reading order."""
         clusters = []
-        my_images = images or {}
+        my_images: dict[Optional[int], Image] = {}
+
+        if images is not None:
+            my_images = images
+
+        # Initialise `my_images` beforehand: sometimes, you have the
+        # page-images but no DocItems!
+        for page_nr, page in doc.pages.items():
+            page_image = doc.pages[page_nr].image
+            if page_image is None or (pil_img := page_image.pil_image) is None:
+                raise RuntimeError("Cannot visualize document without images")
+            elif page_nr not in my_images:
+                image = deepcopy(pil_img)
+                my_images[page_nr] = image
+
         prev_image = None
         prev_page_nr = None
         for idx, (elem, _) in enumerate(
@@ -137,7 +151,11 @@ class LayoutVisualizer(BaseVisualizer):
                 continue  # Skip elements without provenances
             prov = elem.prov[0]
             page_nr = prov.page_no
-            image = my_images.get(page_nr)
+
+            if page_nr in my_images:
+                image = my_images[page_nr]
+            else:
+                raise RuntimeError(f"Cannot visualize page-image for {page_nr}")
 
             if prev_page_nr is None or page_nr > prev_page_nr:  # new page begins
                 # complete previous drawing
@@ -150,13 +168,6 @@ class LayoutVisualizer(BaseVisualizer):
                     )
                     clusters = []
 
-                if image is None:
-                    page_image = doc.pages[page_nr].image
-                    if page_image is None or (pil_img := page_image.pil_image) is None:
-                        raise RuntimeError("Cannot visualize document without images")
-                    else:
-                        image = deepcopy(pil_img)
-                        my_images[page_nr] = image
             tlo_bbox = prov.bbox.to_top_left_origin(
                 page_height=doc.pages[prov.page_no].size.height
             )
