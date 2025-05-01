@@ -1,3 +1,15 @@
+## [v2.29.0](https://github.com/docling-project/docling-core/releases/tag/v2.29.0) - 2025-05-01
+
+### Feature
+
+* Promote serializers to stable API ([#276](https://github.com/docling-project/docling-core/issues/276)) ([`d05fe08`](https://github.com/docling-project/docling-core/commit/d05fe085468fa2548b46d90967038facbdb166b6))
+
+### Fix
+
+* Fix multi-provenance item visualization ([#277](https://github.com/docling-project/docling-core/issues/277)) ([`8677d6e`](https://github.com/docling-project/docling-core/commit/8677d6e9c67c1bac72c8f078fdcdc8891148f32a))
+* Added return value for crop_text method in segmentedPdfPage Class ([#275](https://github.com/docling-project/docling-core/issues/275)) ([`591fe59`](https://github.com/docling-project/docling-core/commit/591fe59357192a05d0ad24310c149edda00c0af4))
+* Make load_from_doctags method static ([#273](https://github.com/docling-project/docling-core/issues/273)) ([`8f85d05`](https://github.com/docling-project/docling-core/commit/8f85d056e8d58964180756572b37138cffef028a))
+
 ## [v2.28.1](https://github.com/docling-project/docling-core/releases/tag/v2.28.1) - 2025-04-25
 
 ### Fix
