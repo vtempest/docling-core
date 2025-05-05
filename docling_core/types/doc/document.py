@@ -2657,16 +2657,25 @@ class DoclingDocument(BaseModel):
         if should_yield:
             yield root, my_stack
 
-        # Handle picture traversal - only traverse children if requested
-        if isinstance(root, PictureItem) and not traverse_pictures:
-            return
-
         my_stack.append(-1)
+
+        allowed_pic_refs: set[str] = (
+            {r.cref for r in root.captions}
+            if (root_is_picture := isinstance(root, PictureItem))
+            else set()
+        )
 
         # Traverse children
         for child_ind, child_ref in enumerate(root.children):
-            my_stack[-1] = child_ind
             child = child_ref.resolve(self)
+            if (
+                root_is_picture
+                and not traverse_pictures
+                and isinstance(child, DocItem)
+                and child.self_ref not in allowed_pic_refs
+            ):
+                continue
+            my_stack[-1] = child_ind
 
             if isinstance(child, NodeItem):
                 yield from self._iterate_items_with_stack(
