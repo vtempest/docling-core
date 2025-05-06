@@ -1,3 +1,17 @@
+## [v2.30.0](https://github.com/docling-project/docling-core/releases/tag/v2.30.0) - 2025-05-06
+
+### Feature
+
+* Add image group serialization in html ([#284](https://github.com/docling-project/docling-core/issues/284)) ([`7f83f1c`](https://github.com/docling-project/docling-core/commit/7f83f1ce84dd4a0ae479430187c193d96d545ba9))
+* Adding the label picture_group ([#283](https://github.com/docling-project/docling-core/issues/283)) ([`2f0f121`](https://github.com/docling-project/docling-core/commit/2f0f12160b56808a068dd157a8acf3462fcb95c9))
+
+### Fix
+
+* Add unit flags to SegmentedPage ([#286](https://github.com/docling-project/docling-core/issues/286)) ([`ad88ecf`](https://github.com/docling-project/docling-core/commit/ad88ecf845e297a6a743fd8bf880ad7c0c9c502e))
+* Update deserialization for better recovery ([#282](https://github.com/docling-project/docling-core/issues/282)) ([`511fb98`](https://github.com/docling-project/docling-core/commit/511fb98a03e60232c5bf2fdc629c936969b05e95))
+* Include captions regardless of `traverse_pictures` flag ([#278](https://github.com/docling-project/docling-core/issues/278)) ([`7eb9fa9`](https://github.com/docling-project/docling-core/commit/7eb9fa96e632529dd5881e78121ad898b82c8bf3))
+* Hashlib usage for FIPS ([#280](https://github.com/docling-project/docling-core/issues/280)) ([`4b967ab`](https://github.com/docling-project/docling-core/commit/4b967ab55c646719ac8b7194592c46e3acc2ef76))
+
 ## [v2.29.0](https://github.com/docling-project/docling-core/releases/tag/v2.29.0) - 2025-05-01
 
 ### Feature
