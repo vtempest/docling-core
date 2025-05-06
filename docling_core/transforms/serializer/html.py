@@ -329,7 +329,11 @@ class HTMLTableSerializer(BaseTableSerializer):
                     if colstart != j:
                         continue
 
-                    content = html.escape(cell.text.strip())
+                    if cell.has_rich_content():
+                        # TODO: Do something that serializes the cell and its children
+                        content = html.escape(cell.text.strip())
+                    else:
+                        content = html.escape(cell.text.strip())
                     celltag = "td"
                     if cell.column_header:
                         celltag = "th"
