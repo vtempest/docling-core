@@ -3,12 +3,12 @@ from docling_core.types.doc.document import DoclingDocument, TableData
 from .test_data_gen_flag import GEN_TEST_DATA
 
 
-def _verify(act_data: str, filename: str, extension: str):
+def _verify(act_data: str, exp_file: str):
     if GEN_TEST_DATA:
-        with open(filename + f".{extension}", "w", encoding="utf-8") as f:
+        with open(exp_file, "w", encoding="utf-8") as f:
             f.write(f"{act_data}\n")
     else:
-        with open(filename + f".{extension}", "r", encoding="utf-8") as f:
+        with open(exp_file, "r", encoding="utf-8") as f:
             exp_data = f.read().rstrip()
         assert exp_data == act_data
 
@@ -80,9 +80,7 @@ def _construct_doc():
 
 def test_rich_table():
 
-    filename = "test/data/doc/rich_table_doc"
-
     doc = _construct_doc()
 
     html_pred = doc.export_to_html()
-    _verify(act_data=html_pred, filename=filename, extension="html")
+    _verify(act_data=html_pred, exp_file="test/data/doc/rich_table_doc.html")
