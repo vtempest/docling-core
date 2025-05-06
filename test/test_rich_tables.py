@@ -8,10 +8,12 @@ def test_construct_rich_table():
     num_cols = 3
     num_rows = 3
 
+    # Construct a table by building data without cells first...
     doc = DoclingDocument(name="test_rich_table")
     data = TableData(num_rows=num_rows, num_cols=num_cols)
     tbl = doc.add_table(data=data)
 
+    # Then add cells with the update_cell method.
     first_cell = tbl.update_cell(
         text="AB",
         start_row_offset_idx=0,
@@ -61,7 +63,6 @@ def test_construct_rich_table():
     print(fourth_cell)
 
     fifth_cell = tbl.update_cell(
-        text="3",
         start_row_offset_idx=1,
         end_row_offset_idx=2,
         start_col_offset_idx=2,
@@ -72,6 +73,7 @@ def test_construct_rich_table():
 
     print(fifth_cell)
 
+    # Add a child item to the fifth cell to add rich content.
     doc.add_text(parent=fifth_cell, text="Foo", label=DocItemLabel.TEXT)
 
     # Test serialization
