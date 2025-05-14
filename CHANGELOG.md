@@ -1,3 +1,9 @@
+## [v2.30.1](https://github.com/docling-project/docling-core/releases/tag/v2.30.1) - 2025-05-14
+
+### Fix
+
+* Updates for labels and methods to support document GT annotation ([#293](https://github.com/docling-project/docling-core/issues/293)) ([`aa957cf`](https://github.com/docling-project/docling-core/commit/aa957cf4b6bb083886dc51b716189d046c38005c))
+
 ## [v2.30.0](https://github.com/docling-project/docling-core/releases/tag/v2.30.0) - 2025-05-06
 
 ### Feature
