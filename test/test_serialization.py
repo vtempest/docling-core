@@ -12,6 +12,7 @@ from docling_core.transforms.serializer.markdown import (
     MarkdownDocSerializer,
     MarkdownParams,
 )
+from docling_core.transforms.visualizer.layout_visualizer import LayoutVisualizer
 from docling_core.types.doc.base import ImageRefMode
 from docling_core.types.doc.document import DoclingDocument
 from docling_core.types.doc.labels import DocItemLabel
@@ -181,6 +182,32 @@ def test_html_split_page_p2():
     )
     actual = ser.serialize().text
     verify(exp_file=src.parent / f"{src.stem}_split_p2.gt.html", actual=actual)
+
+
+def test_html_split_page_p2_with_visualizer():
+    src = Path("./test/data/doc/2408.09869v3_enriched.json")
+    doc = DoclingDocument.load_from_json(src)
+
+    ser = HTMLDocSerializer(
+        doc=doc,
+        params=HTMLParams(
+            image_mode=ImageRefMode.EMBEDDED,
+            output_style=HTMLOutputStyle.SPLIT_PAGE,
+            pages={2},
+        ),
+    )
+    ser_res = ser.serialize(
+        visualizer=LayoutVisualizer(),
+    )
+    actual = ser_res.text
+
+    # pinning the result with visualizer appeared flaky, so at least ensure it contains
+    # a figure (for the page) and that it is different than without visualizer:
+    assert '<figure><img src="data:image/png;base64' in actual
+    file_without_viz = src.parent / f"{src.stem}_split_p2.gt.html"
+    with open(file_without_viz) as f:
+        data_without_viz = f.read()
+    assert actual.strip() != data_without_viz.strip()
 
 
 def test_html_split_page_no_page_breaks():
