@@ -29,8 +29,8 @@ from docling_core.transforms.serializer.base import (
 from docling_core.transforms.serializer.common import (
     CommonParams,
     DocSerializer,
+    _get_picture_annotation_text,
     _PageBreakSerResult,
-    _serialize_picture_annotation,
     create_ser_result,
 )
 from docling_core.types.doc.base import ImageRefMode
@@ -223,7 +223,7 @@ class MarkdownPictureSerializer(BasePictureSerializer):
 
         if params.include_annotations:
             for annotation in item.annotations:
-                if ann_text := _serialize_picture_annotation(annotation=annotation):
+                if ann_text := _get_picture_annotation_text(annotation=annotation):
                     ann_ser_res = create_ser_result(text=ann_text, span_source=item)
                     res_parts.append(ann_ser_res)
 

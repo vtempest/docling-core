@@ -122,7 +122,7 @@ def _iterate_items(
         yield item
 
 
-def _serialize_picture_annotation(annotation: PictureDataType) -> Optional[str]:
+def _get_picture_annotation_text(annotation: PictureDataType) -> Optional[str]:
     result = None
     if isinstance(annotation, PictureClassificationData):
         predicted_class = (

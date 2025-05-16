@@ -35,7 +35,7 @@ from docling_core.transforms.serializer.base import (
 from docling_core.transforms.serializer.common import (
     CommonParams,
     DocSerializer,
-    _serialize_picture_annotation,
+    _get_picture_annotation_text,
     create_ser_result,
 )
 from docling_core.transforms.serializer.html_styles import (
@@ -458,12 +458,6 @@ class HTMLPictureSerializer(BasePictureSerializer):
                     res_parts.append(
                         create_ser_result(text=html_table_content, span_source=item)
                     )
-
-        if params.include_annotations:
-            for annotation in item.annotations:
-                if ann_text := _serialize_picture_annotation(annotation=annotation):
-                    ann_ser_res = create_ser_result(text=ann_text, span_source=item)
-                    res_parts.append(ann_ser_res)
 
         text_res = "".join([r.text for r in res_parts])
         if text_res:
@@ -959,6 +953,16 @@ class HTMLDocSerializer(DocSerializer):
                 if isinstance(it := cap.resolve(self.doc), TextItem)
                 and it.self_ref not in self.get_excluded_refs(**kwargs)
             ]
+            if params.include_annotations:
+                if isinstance(item, PictureItem):
+                    for ann in item.annotations:
+                        if ann_text := _get_picture_annotation_text(annotation=ann):
+                            ann_ser_res = create_ser_result(
+                                text=ann_text,
+                                span_source=item,
+                            )
+                            results.append(ann_ser_res)
+
             text_res = params.caption_delim.join([r.text for r in results])
             if text_res:
                 text_dir = get_text_direction(text_res)
