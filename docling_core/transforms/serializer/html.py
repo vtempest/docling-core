@@ -35,6 +35,7 @@ from docling_core.transforms.serializer.base import (
 from docling_core.transforms.serializer.common import (
     CommonParams,
     DocSerializer,
+    _serialize_picture_annotation,
     create_ser_result,
 )
 from docling_core.transforms.serializer.html_styles import (
@@ -109,6 +110,8 @@ class HTMLParams(CommonParams):
 
     # Enable charts to be printed into HTML as tables
     enable_chart_tables: bool = True
+
+    include_annotations: bool = True
 
 
 class HTMLTextSerializer(BaseModel, BaseTextSerializer):
@@ -455,6 +458,12 @@ class HTMLPictureSerializer(BasePictureSerializer):
                     res_parts.append(
                         create_ser_result(text=html_table_content, span_source=item)
                     )
+
+        if params.include_annotations:
+            for annotation in item.annotations:
+                if ann_text := _serialize_picture_annotation(annotation=annotation):
+                    ann_ser_res = create_ser_result(text=ann_text, span_source=item)
+                    res_parts.append(ann_ser_res)
 
         text_res = "".join([r.text for r in res_parts])
         if text_res:

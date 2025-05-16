@@ -30,6 +30,7 @@ from docling_core.transforms.serializer.common import (
     CommonParams,
     DocSerializer,
     _PageBreakSerResult,
+    _serialize_picture_annotation,
     create_ser_result,
 )
 from docling_core.types.doc.base import ImageRefMode
@@ -69,6 +70,7 @@ class MarkdownParams(CommonParams):
     page_break_placeholder: Optional[str] = None  # e.g. "<!-- page break -->"
     escape_underscores: bool = True
     escape_html: bool = True
+    include_annotations: bool = True
 
 
 class MarkdownTextSerializer(BaseModel, BaseTextSerializer):
@@ -218,6 +220,12 @@ class MarkdownPictureSerializer(BasePictureSerializer):
             )
             if img_res.text:
                 res_parts.append(img_res)
+
+        if params.include_annotations:
+            for annotation in item.annotations:
+                if ann_text := _serialize_picture_annotation(annotation=annotation):
+                    ann_ser_res = create_ser_result(text=ann_text, span_source=item)
+                    res_parts.append(ann_ser_res)
 
         if params.enable_chart_tables:
             # Check if picture has attached PictureTabularChartData
