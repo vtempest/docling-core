@@ -1,3 +1,9 @@
+## [v2.31.0](https://github.com/docling-project/docling-core/releases/tag/v2.31.0) - 2025-05-18
+
+### Feature
+
+* Provide visualizer option in HTML split view ([#294](https://github.com/docling-project/docling-core/issues/294)) ([`6a7eb53`](https://github.com/docling-project/docling-core/commit/6a7eb537eb6a9f35c3ffa3d43ebbad4e5ce5ab9c))
+
 ## [v2.30.1](https://github.com/docling-project/docling-core/releases/tag/v2.30.1) - 2025-05-14
 
 ### Fix
