@@ -1,4 +1,4 @@
-<!-- generated beginning -->Picture type: bar chart<!-- generated end -->
+bar chart
 
 <!-- image -->
 

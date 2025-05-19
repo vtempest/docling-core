@@ -2925,8 +2925,6 @@ class DoclingDocument(BaseModel):
         included_content_layers: Optional[set[ContentLayer]] = None,
         page_break_placeholder: Optional[str] = None,
         include_annotations: bool = True,
-        annotation_opening_marker: str = "<!-- generated beginning -->",
-        annotation_closing_marker: str = "<!-- generated end -->",
     ):
         """Save to markdown."""
         if isinstance(filename, str):
@@ -2955,8 +2953,6 @@ class DoclingDocument(BaseModel):
             included_content_layers=included_content_layers,
             page_break_placeholder=page_break_placeholder,
             include_annotations=include_annotations,
-            annotation_opening_marker=annotation_opening_marker,
-            annotation_closing_marker=annotation_closing_marker,
         )
 
         with open(filename, "w", encoding="utf-8") as fw:
@@ -2979,8 +2975,7 @@ class DoclingDocument(BaseModel):
         included_content_layers: Optional[set[ContentLayer]] = None,
         page_break_placeholder: Optional[str] = None,  # e.g. "<!-- page break -->",
         include_annotations: bool = True,
-        annotation_opening_marker: str = "<!-- generated beginning -->",
-        annotation_closing_marker: str = "<!-- generated end -->",
+        mark_annotations: bool = False,
     ) -> str:
         r"""Serialize to Markdown.
 
@@ -3021,14 +3016,9 @@ class DoclingDocument(BaseModel):
         :param include_annotations: bool: Whether to include annotations in the export.
             (Default value = True).
         :type include_annotations: bool = True
-        :param annotation_opening_marker: The marker to indicate the beginning of
-            annotation content; only relevant if include_annotations is True. (Default
-            value = "<!-- generated beginning -->").
-        :type annotation_opening_marker: str = "<!-- generated beginning -->"
-        :param annotation_closing_marker: The marker to indicate the end of annotation
-            content; only relevant if include_annotations is True. (Default value =
-            "<!-- generated end -->").
-        :type annotation_closing_marker: str = "<!-- generated end -->"
+        :param mark_annotations: bool: Whether to mark annotations in the export; only
+            relevant if include_annotations is True. (Default value = False).
+        :type mark_annotations: bool = False
         :returns: The exported Markdown representation.
         :rtype: str
         """
@@ -3059,8 +3049,7 @@ class DoclingDocument(BaseModel):
                 wrap_width=text_width if text_width > 0 else None,
                 page_break_placeholder=page_break_placeholder,
                 include_annotations=include_annotations,
-                annotation_opening_marker=annotation_opening_marker,
-                annotation_closing_marker=annotation_closing_marker,
+                mark_annotations=mark_annotations,
             ),
         )
         ser_res = serializer.serialize()
@@ -3111,8 +3100,6 @@ class DoclingDocument(BaseModel):
         included_content_layers: Optional[set[ContentLayer]] = None,
         split_page_view: bool = False,
         include_annotations: bool = True,
-        annotation_opening_marker: str = "<!-- generated beginning -->",
-        annotation_closing_marker: str = "<!-- generated end -->",
     ):
         """Save to HTML."""
         if isinstance(filename, str):
@@ -3139,8 +3126,6 @@ class DoclingDocument(BaseModel):
             included_content_layers=included_content_layers,
             split_page_view=split_page_view,
             include_annotations=include_annotations,
-            annotation_opening_marker=annotation_opening_marker,
-            annotation_closing_marker=annotation_closing_marker,
         )
 
         with open(filename, "w", encoding="utf-8") as fw:
@@ -3194,8 +3179,6 @@ class DoclingDocument(BaseModel):
         included_content_layers: Optional[set[ContentLayer]] = None,
         split_page_view: bool = False,
         include_annotations: bool = True,
-        annotation_opening_marker: str = "<!-- generated beginning -->",
-        annotation_closing_marker: str = "<!-- generated end -->",
     ) -> str:
         r"""Serialize to HTML."""
         from docling_core.transforms.serializer.html import (
@@ -3228,8 +3211,6 @@ class DoclingDocument(BaseModel):
             html_lang=html_lang,
             output_style=output_style,
             include_annotations=include_annotations,
-            annotation_opening_marker=annotation_opening_marker,
-            annotation_closing_marker=annotation_closing_marker,
         )
 
         if html_head == "null":

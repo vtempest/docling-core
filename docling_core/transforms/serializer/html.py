@@ -112,8 +112,6 @@ class HTMLParams(CommonParams):
     enable_chart_tables: bool = True
 
     include_annotations: bool = True
-    annotation_opening_marker: str = "<!-- generated beginning -->"
-    annotation_closing_marker: str = "<!-- generated end -->"
 
 
 class HTMLTextSerializer(BaseModel, BaseTextSerializer):
@@ -966,9 +964,9 @@ class HTMLDocSerializer(DocSerializer):
                     if ann_text := _get_picture_annotation_text(annotation=ann):
                         ann_ser_res = create_ser_result(
                             text=(
-                                f"{params.annotation_opening_marker}"
+                                f'<div data-annotation-kind="{ann.kind}">'
                                 f"{html.escape(ann_text)}"
-                                f"{params.annotation_closing_marker}"
+                                f"</div>"
                             ),
                             span_source=item,
                         )

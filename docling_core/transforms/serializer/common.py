@@ -131,11 +131,11 @@ def _get_picture_annotation_text(annotation: PictureDataType) -> Optional[str]:
             else None
         )
         if predicted_class is not None:
-            result = f"Picture type: {predicted_class.replace('_', ' ')}"
+            result = predicted_class.replace("_", " ")
     elif isinstance(annotation, PictureDescriptionData):
-        result = f"Picture description: {annotation.text}"
+        result = annotation.text
     elif isinstance(annotation, PictureMoleculeData):
-        result = f"Picture SMILES: {annotation.smi}"
+        result = annotation.smi
     return result
 
 

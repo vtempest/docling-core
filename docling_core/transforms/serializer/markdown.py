@@ -71,8 +71,7 @@ class MarkdownParams(CommonParams):
     escape_underscores: bool = True
     escape_html: bool = True
     include_annotations: bool = True
-    annotation_opening_marker: str = "<!-- generated beginning -->"
-    annotation_closing_marker: str = "<!-- generated end -->"
+    mark_annotations: bool = False
 
 
 class MarkdownTextSerializer(BaseModel, BaseTextSerializer):
@@ -220,9 +219,13 @@ class MarkdownPictureSerializer(BasePictureSerializer):
                     if ann_text := _get_picture_annotation_text(annotation=ann):
                         ann_ser_res = create_ser_result(
                             text=(
-                                f"{params.annotation_opening_marker}"
-                                f"{ann_text}"
-                                f"{params.annotation_closing_marker}"
+                                (
+                                    f'<!--<annotation kind="{ann.kind}">-->'
+                                    f"{ann_text}"
+                                    f"<!--<annotation/>-->"
+                                )
+                                if params.mark_annotations
+                                else ann_text
                             ),
                             span_source=item,
                         )
