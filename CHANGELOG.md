@@ -1,3 +1,9 @@
+## [v2.31.1](https://github.com/docling-project/docling-core/releases/tag/v2.31.1) - 2025-05-20
+
+### Fix
+
+* **markdown:** Fix case of empty page break string ([#298](https://github.com/docling-project/docling-core/issues/298)) ([`c49a50e`](https://github.com/docling-project/docling-core/commit/c49a50e76ba74579350eb874c2b731490c00ea1f))
+
 ## [v2.31.0](https://github.com/docling-project/docling-core/releases/tag/v2.31.0) - 2025-05-18
 
 ### Feature
