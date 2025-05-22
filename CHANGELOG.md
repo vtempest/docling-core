@@ -1,3 +1,9 @@
+## [v2.31.2](https://github.com/docling-project/docling-core/releases/tag/v2.31.2) - 2025-05-22
+
+### Fix
+
+* Fix hybrid chunker legacy patching ([#300](https://github.com/docling-project/docling-core/issues/300)) ([`ebc356a`](https://github.com/docling-project/docling-core/commit/ebc356a787a404ca73dbe473d7d5e17fa4951954))
+
 ## [v2.31.1](https://github.com/docling-project/docling-core/releases/tag/v2.31.1) - 2025-05-20
 
 ### Fix
