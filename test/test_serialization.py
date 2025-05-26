@@ -374,9 +374,9 @@ def test_html_include_annotations_true():
 
 
 def test_doctags_inline_loc_tags():
-    src = Path("./test/data/doc/2106.09680v1.json")
+    src = Path("./test/data/doc/2408.09869v3_enriched.json")
     doc = DoclingDocument.load_from_json(src)
 
     ser = DocTagsDocSerializer(doc=doc)
     actual = ser.serialize().text
-    verify(exp_file=src.parent / f"{src.stem}.dt", actual=actual)
+    verify(exp_file=src.parent / f"{src.stem}.out.dt", actual=actual)
