@@ -3705,18 +3705,16 @@ class DoclingDocument(BaseModel):
                     inline_group = doc.add_inline_group()
                     content = match.group("content")
                     common_bbox = extract_bounding_box(content)
-                    for it_match in pattern.finditer(content):
-                        it_full_match = it_match.group(0)
-                        it_tag_name = it_match.group("tag")
-                        it_doc_label = tag_to_doclabel.get(tag_name, DocItemLabel.TEXT)
+                    for item_match in pattern.finditer(content):
+                        item_tag = item_match.group("tag")
                         _add_text(
-                            full_chunk=it_full_match,
+                            full_chunk=item_match.group(0),
                             bbox=common_bbox,
                             pg_width=pg_width,
                             pg_height=pg_height,
                             page_no=page_no,
-                            tag_name=it_tag_name,
-                            doc_label=it_doc_label,
+                            tag_name=item_tag,
+                            doc_label=tag_to_doclabel.get(item_tag, DocItemLabel.TEXT),
                             doc=doc,
                             parent=inline_group,
                         )
