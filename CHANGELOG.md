@@ -1,3 +1,13 @@
+## [v2.32.0](https://github.com/docling-project/docling-core/releases/tag/v2.32.0) - 2025-05-27
+
+### Feature
+
+* Add annotations in MD & HTML serialization ([#295](https://github.com/docling-project/docling-core/issues/295)) ([`f067c51`](https://github.com/docling-project/docling-core/commit/f067c51c48d3ff69438ef9cc301f45a565b341ee))
+
+### Fix
+
+* **HybridChunker:** Refine `max_tokens` auto-detection ([#306](https://github.com/docling-project/docling-core/issues/306)) ([`87b72d6`](https://github.com/docling-project/docling-core/commit/87b72d653789847ae170110fbb551f34277f0399))
+
 ## [v2.31.2](https://github.com/docling-project/docling-core/releases/tag/v2.31.2) - 2025-05-22
 
 ### Fix
