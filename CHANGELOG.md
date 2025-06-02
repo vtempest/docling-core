@@ -1,3 +1,9 @@
+## [v2.33.0](https://github.com/docling-project/docling-core/releases/tag/v2.33.0) - 2025-06-02
+
+### Feature
+
+* Add BoundingBox methods for overlap and union calculations ([#311](https://github.com/docling-project/docling-core/issues/311)) ([`c521766`](https://github.com/docling-project/docling-core/commit/c521766cb7eb0dfb7d2e1eb5befe3e7e13453e9a))
+
 ## [v2.32.0](https://github.com/docling-project/docling-core/releases/tag/v2.32.0) - 2025-05-27
 
 ### Feature
