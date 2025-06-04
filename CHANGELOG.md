@@ -1,3 +1,10 @@
+## [v2.33.1](https://github.com/docling-project/docling-core/releases/tag/v2.33.1) - 2025-06-04
+
+### Fix
+
+* New typer version with new click ([#315](https://github.com/docling-project/docling-core/issues/315)) ([`e17eabf`](https://github.com/docling-project/docling-core/commit/e17eabf0f92c3e3fde9f47fea083e44081bb9669))
+* Support section_header levels in doctags deserialization ([#313](https://github.com/docling-project/docling-core/issues/313)) ([`defd49e`](https://github.com/docling-project/docling-core/commit/defd49efae08c0cc2ce002f847724b6d65bd1407))
+
 ## [v2.33.0](https://github.com/docling-project/docling-core/releases/tag/v2.33.0) - 2025-06-02
 
 ### Feature
