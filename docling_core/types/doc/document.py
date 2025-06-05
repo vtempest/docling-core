@@ -15,7 +15,7 @@ import warnings
 from enum import Enum
 from io import BytesIO
 from pathlib import Path
-from typing import Any, Dict, Final, List, Literal, Optional, Tuple, Union
+from typing import Any, Dict, Final, List, Literal, Optional, Sequence, Tuple, Union
 from urllib.parse import unquote
 
 import pandas as pd
@@ -30,6 +30,7 @@ from pydantic import (
     computed_field,
     field_validator,
     model_validator,
+    validate_call,
 )
 from tabulate import tabulate
 from typing_extensions import Annotated, Self, deprecated
@@ -53,7 +54,7 @@ _logger = logging.getLogger(__name__)
 
 Uint64 = typing.Annotated[int, Field(ge=0, le=(2**64 - 1))]
 LevelNumber = typing.Annotated[int, Field(ge=1, le=100)]
-CURRENT_VERSION: Final = "1.3.0"
+CURRENT_VERSION: Final = "1.4.0"
 
 DEFAULT_EXPORT_LABELS = {
     DocItemLabel.TITLE,
@@ -85,8 +86,8 @@ DOCUMENT_TOKENS_EXPORT_LABELS.update(
 )
 
 
-class BasePictureData(BaseModel):
-    """BasePictureData."""
+class BaseAnnotation(BaseModel):
+    """Base class for all annotation types."""
 
     kind: str
 
@@ -98,7 +99,7 @@ class PictureClassificationClass(BaseModel):
     confidence: float
 
 
-class PictureClassificationData(BasePictureData):
+class PictureClassificationData(BaseAnnotation):
     """PictureClassificationData."""
 
     kind: Literal["classification"] = "classification"
@@ -106,19 +107,18 @@ class PictureClassificationData(BasePictureData):
     predicted_classes: List[PictureClassificationClass]
 
 
-class PictureDescriptionData(BasePictureData):
-    """PictureDescriptionData."""
+class DescriptionAnnotation(BaseAnnotation):
+    """DescriptionAnnotation."""
 
     kind: Literal["description"] = "description"
     text: str
     provenance: str
 
 
-class PictureMoleculeData(BaseModel):
+class PictureMoleculeData(BaseAnnotation):
     """PictureMoleculeData."""
 
     kind: Literal["molecule_data"] = "molecule_data"
-
     smi: str
     confidence: float
     class_name: str
@@ -126,11 +126,17 @@ class PictureMoleculeData(BaseModel):
     provenance: str
 
 
-class PictureMiscData(BaseModel):
-    """PictureMiscData."""
+class MiscAnnotation(BaseAnnotation):
+    """MiscAnnotation."""
 
     kind: Literal["misc"] = "misc"
     content: Dict[str, Any]
+
+
+# deprecated aliases:
+BasePictureData = BaseAnnotation
+PictureDescriptionData = DescriptionAnnotation
+PictureMiscData = MiscAnnotation
 
 
 class ChartLine(BaseModel):
@@ -196,7 +202,7 @@ class ChartPoint(BaseModel):
     value: Tuple[float, float]
 
 
-class PictureChartData(BaseModel):
+class PictureChartData(BaseAnnotation):
     """Base class for picture chart data.
 
     Attributes:
@@ -381,10 +387,10 @@ class PictureTabularChartData(PictureChartData):
 
 PictureDataType = Annotated[
     Union[
+        DescriptionAnnotation,
+        MiscAnnotation,
         PictureClassificationData,
-        PictureDescriptionData,
         PictureMoleculeData,
-        PictureMiscData,
         PictureTabularChartData,
         PictureLineChartData,
         PictureBarChartData,
@@ -818,6 +824,10 @@ class DocItem(
         )
         return page_image.crop(crop_bbox.as_tuple())
 
+    def get_annotations(self) -> Sequence[BaseAnnotation]:
+        """Get the annotations of this DocItem."""
+        return []
+
 
 class Formatting(BaseModel):
     """Formatting."""
@@ -1182,6 +1192,19 @@ class PictureItem(FloatingItem):
         text = serializer.serialize(item=self).text
         return text
 
+    def get_annotations(self) -> Sequence[BaseAnnotation]:
+        """Get the annotations of this PictureItem."""
+        return self.annotations
+
+
+TableAnnotationType = Annotated[
+    Union[
+        DescriptionAnnotation,
+        MiscAnnotation,
+    ],
+    Field(discriminator="kind"),
+]
+
 
 class TableItem(FloatingItem):
     """TableItem."""
@@ -1191,6 +1214,8 @@ class TableItem(FloatingItem):
         DocItemLabel.DOCUMENT_INDEX,
         DocItemLabel.TABLE,
     ] = DocItemLabel.TABLE
+
+    annotations: List[TableAnnotationType] = []
 
     def export_to_dataframe(self) -> pd.DataFrame:
         """Export the table as a Pandas DataFrame."""
@@ -1437,6 +1462,15 @@ class TableItem(FloatingItem):
         )
         text = serializer.serialize(item=self).text
         return text
+
+    @validate_call
+    def add_annotation(self, annotation: TableAnnotationType) -> None:
+        """Add an annotation to the table."""
+        self.annotations.append(annotation)
+
+    def get_annotations(self) -> Sequence[BaseAnnotation]:
+        """Get the annotations of this TableItem."""
+        return self.annotations
 
 
 class GraphCell(BaseModel):
@@ -2267,6 +2301,7 @@ class DoclingDocument(BaseModel):
         parent: Optional[NodeItem] = None,
         label: DocItemLabel = DocItemLabel.TABLE,
         content_layer: Optional[ContentLayer] = None,
+        annotations: Optional[list[TableAnnotationType]] = None,
     ):
         """add_table.
 
@@ -2284,7 +2319,11 @@ class DoclingDocument(BaseModel):
         cref = f"#/tables/{table_index}"
 
         tbl_item = TableItem(
-            label=label, data=data, self_ref=cref, parent=parent.get_ref()
+            label=label,
+            data=data,
+            self_ref=cref,
+            parent=parent.get_ref(),
+            annotations=annotations or [],
         )
         if prov:
             tbl_item.prov.append(prov)
@@ -2301,7 +2340,7 @@ class DoclingDocument(BaseModel):
 
     def add_picture(
         self,
-        annotations: List[PictureDataType] = [],
+        annotations: Optional[List[PictureDataType]] = None,
         image: Optional[ImageRef] = None,
         caption: Optional[Union[TextItem, RefItem]] = None,
         prov: Optional[ProvenanceItem] = None,
@@ -2310,7 +2349,7 @@ class DoclingDocument(BaseModel):
     ):
         """add_picture.
 
-        :param data: List[PictureData]: (Default value = [])
+        :param data: Optional[List[PictureData]]: (Default value = None)
         :param caption: Optional[Union[TextItem:
         :param RefItem]]:  (Default value = None)
         :param prov: Optional[ProvenanceItem]:  (Default value = None)
@@ -2324,7 +2363,7 @@ class DoclingDocument(BaseModel):
 
         fig_item = PictureItem(
             label=DocItemLabel.PICTURE,
-            annotations=annotations,
+            annotations=annotations or [],
             image=image,
             self_ref=cref,
             parent=parent.get_ref(),
