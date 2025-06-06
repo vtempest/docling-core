@@ -554,6 +554,10 @@
           "default": false,
           "title": "Strikethrough",
           "type": "boolean"
+        },
+        "script": {
+          "$ref": "#/$defs/Script",
+          "default": "baseline"
         }
       },
       "title": "Formatting",
@@ -1714,6 +1718,16 @@
       ],
       "title": "RefItem",
       "type": "object"
+    },
+    "Script": {
+      "description": "Text script position.",
+      "enum": [
+        "baseline",
+        "sub",
+        "super"
+      ],
+      "title": "Script",
+      "type": "string"
     },
     "SectionHeaderItem": {
       "additionalProperties": false,

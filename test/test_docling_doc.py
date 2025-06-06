@@ -33,6 +33,7 @@ from docling_core.types.doc.document import (  # BoundingBox,
     PictureItem,
     ProvenanceItem,
     RefItem,
+    Script,
     SectionHeaderItem,
     Size,
     TableCell,
@@ -942,7 +943,7 @@ def _construct_doc() -> DoclingDocument:
         text="Here a code snippet:",
         parent=inline1,
     )
-    doc.add_code(text="<p>Hello world</p>", parent=inline1)
+    doc.add_code(text='print("Hello world")', parent=inline1)
     doc.add_text(
         label=DocItemLabel.TEXT, text="(to be displayed inline)", parent=inline1
     )
@@ -1020,6 +1021,20 @@ def _construct_doc() -> DoclingDocument:
         text="strikethrough",
         parent=inline_fmt,
         formatting=Formatting(strikethrough=True),
+    )
+    doc.add_text(
+        label=DocItemLabel.TEXT,
+        text="subscript",
+        orig="subscript",
+        formatting=Formatting(script=Script.SUB),
+        parent=inline_fmt,
+    )
+    doc.add_text(
+        label=DocItemLabel.TEXT,
+        text="superscript",
+        orig="superscript",
+        formatting=Formatting(script=Script.SUPER),
+        parent=inline_fmt,
     )
     doc.add_text(
         label=DocItemLabel.TEXT,
