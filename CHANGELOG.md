@@ -1,3 +1,15 @@
+## [v2.34.0](https://github.com/docling-project/docling-core/releases/tag/v2.34.0) - 2025-06-06
+
+### Feature
+
+* **doctags:** Add enclosing bbox to inline ([#302](https://github.com/docling-project/docling-core/issues/302)) ([`dcc198f`](https://github.com/docling-project/docling-core/commit/dcc198f7c6231fe8c781abe4a83194be2ee8d23b))
+* Add subscript & superscript formatting ([#319](https://github.com/docling-project/docling-core/issues/319)) ([`ae96129`](https://github.com/docling-project/docling-core/commit/ae961299a5f729acecf1b2b346113ac23e8b97f0))
+* Add table annotations ([#304](https://github.com/docling-project/docling-core/issues/304)) ([`d8a5256`](https://github.com/docling-project/docling-core/commit/d8a5256b2cb654ceb35a70be1b656ac7463ad335))
+
+### Fix
+
+* Fix misplaced list items ([#317](https://github.com/docling-project/docling-core/issues/317)) ([`c383f64`](https://github.com/docling-project/docling-core/commit/c383f64c44b4e1eb760d19d9422948fea127331c))
+
 ## [v2.33.1](https://github.com/docling-project/docling-core/releases/tag/v2.33.1) - 2025-06-04
 
 ### Fix
