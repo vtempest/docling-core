@@ -1,3 +1,9 @@
+## [v2.34.1](https://github.com/docling-project/docling-core/releases/tag/v2.34.1) - 2025-06-08
+
+### Fix
+
+* Warn when adding misplaced ListItem via API ([#321](https://github.com/docling-project/docling-core/issues/321)) ([`01b27b5`](https://github.com/docling-project/docling-core/commit/01b27b57b32c8a1a23e65ce3bf60cd1c027ca915))
+
 ## [v2.34.0](https://github.com/docling-project/docling-core/releases/tag/v2.34.0) - 2025-06-06
 
 ### Feature
