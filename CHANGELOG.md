@@ -1,3 +1,9 @@
+## [v2.34.2](https://github.com/docling-project/docling-core/releases/tag/v2.34.2) - 2025-06-10
+
+### Fix
+
+* Fix doc traversal for item deletion ([#324](https://github.com/docling-project/docling-core/issues/324)) ([`076ad2b`](https://github.com/docling-project/docling-core/commit/076ad2ba9bd551daf1ee6a0141d360a7be8a18bd))
+
 ## [v2.34.1](https://github.com/docling-project/docling-core/releases/tag/v2.34.1) - 2025-06-08
 
 ### Fix
