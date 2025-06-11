@@ -1,3 +1,9 @@
+## [v2.35.0](https://github.com/docling-project/docling-core/releases/tag/v2.35.0) - 2025-06-11
+
+### Feature
+
+* Visualizer for table cells ([#325](https://github.com/docling-project/docling-core/issues/325)) ([`45667c7`](https://github.com/docling-project/docling-core/commit/45667c751bc0c3601635ea575ff204595c1ae4d5))
+
 ## [v2.34.2](https://github.com/docling-project/docling-core/releases/tag/v2.34.2) - 2025-06-10
 
 ### Fix
