@@ -40,6 +40,7 @@ class LayoutVisualizer(BaseVisualizer):
         """Layout visualization parameters."""
 
         show_label: bool = True
+        content_layers: set[ContentLayer] = {cl for cl in ContentLayer}
 
     base_visualizer: Optional[BaseVisualizer] = None
     params: Params = Params()
