@@ -1,3 +1,9 @@
+## [v2.36.0](https://github.com/docling-project/docling-core/releases/tag/v2.36.0) - 2025-06-11
+
+### Feature
+
+* New labels for CVAT annotation ([#314](https://github.com/docling-project/docling-core/issues/314)) ([`aa430d3`](https://github.com/docling-project/docling-core/commit/aa430d377649a31f439cb63aa3c57a99e751a39f))
+
 ## [v2.35.0](https://github.com/docling-project/docling-core/releases/tag/v2.35.0) - 2025-06-11
 
 ### Feature
