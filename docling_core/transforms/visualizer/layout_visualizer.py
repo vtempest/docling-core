@@ -40,6 +40,7 @@ class LayoutVisualizer(BaseVisualizer):
         """Layout visualization parameters."""
 
         show_label: bool = True
+        content_layers: set[ContentLayer] = {cl for cl in ContentLayer}
 
     base_visualizer: Optional[BaseVisualizer] = None
     params: Params = Params()
@@ -119,7 +120,10 @@ class LayoutVisualizer(BaseVisualizer):
                     )
 
     def _draw_doc_layout(
-        self, doc: DoclingDocument, images: Optional[dict[Optional[int], Image]] = None
+        self,
+        doc: DoclingDocument,
+        images: Optional[dict[Optional[int], Image]] = None,
+        included_content_layers: Optional[set[ContentLayer]] = None,
     ):
         """Draw the document clusters and optionaly the reading order."""
         clusters = []
@@ -127,6 +131,9 @@ class LayoutVisualizer(BaseVisualizer):
 
         if images is not None:
             my_images = images
+
+        if included_content_layers is None:
+            included_content_layers = {c for c in ContentLayer}
 
         # Initialise `my_images` beforehand: sometimes, you have the
         # page-images but no DocItems!
@@ -141,9 +148,7 @@ class LayoutVisualizer(BaseVisualizer):
         prev_image = None
         prev_page_nr = None
         for idx, (elem, _) in enumerate(
-            doc.iterate_items(
-                included_content_layers={ContentLayer.BODY, ContentLayer.FURNITURE}
-            )
+            doc.iterate_items(included_content_layers=included_content_layers)
         ):
             if not isinstance(elem, DocItem):
                 continue

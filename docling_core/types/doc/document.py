@@ -623,6 +623,7 @@ class ContentLayer(str, Enum):
 
     BODY = "body"
     FURNITURE = "furniture"
+    BACKGROUND = "background"
 
 
 DEFAULT_CONTENT_LAYERS = {ContentLayer.BODY}
@@ -860,6 +861,7 @@ class TextItem(DocItem):
         DocItemLabel.PARAGRAPH,
         DocItemLabel.REFERENCE,
         DocItemLabel.TEXT,
+        DocItemLabel.EMPTY_VALUE,
     ]
 
     orig: str  # untreated representation
@@ -1874,12 +1876,19 @@ class DoclingDocument(BaseModel):
 
         return item.get_ref()
 
-    def _delete_items(self, refs: list[RefItem]) -> bool:
+    def _delete_items(self, refs: list[RefItem]):
         """Delete document item using the self-reference."""
         to_be_deleted_items: dict[tuple[int, ...], str] = {}  # stack to cref
 
+        if not refs:
+            return
+
         # Identify the to_be_deleted_items
-        for item, stack in self._iterate_items_with_stack(with_groups=True):
+        for item, stack in self._iterate_items_with_stack(
+            with_groups=True,
+            traverse_pictures=True,
+            included_content_layers={c for c in ContentLayer},
+        ):
             ref = item.get_ref()
 
             if ref in refs:
@@ -1890,8 +1899,10 @@ class DoclingDocument(BaseModel):
                 if tuple(substack) in to_be_deleted_items:
                     to_be_deleted_items[tuple(stack)] = ref.cref
 
-        if len(to_be_deleted_items) == 0:
-            raise ValueError("Nothing to be deleted ...")
+        if len(to_be_deleted_items) < len(refs):
+            raise ValueError(
+                f"Cannot find all provided RefItems in doc: {[r.cref for r in refs]}"
+            )
 
         # Clean the tree, reverse the order to not have to update
         for stack_, ref_ in reversed(sorted(to_be_deleted_items.items())):
@@ -1930,8 +1941,6 @@ class DoclingDocument(BaseModel):
         self._update_breadth_first_with_lookup(
             node=self.body, refs_to_be_deleted=refs, lookup=lookup
         )
-
-        return True
 
     # Update the references
     def _update_ref_with_lookup(
@@ -2860,22 +2869,45 @@ class DoclingDocument(BaseModel):
 
     def print_element_tree(self):
         """Print_element_tree."""
-        for ix, (item, level) in enumerate(self.iterate_items(with_groups=True)):
+        for ix, (item, level) in enumerate(
+            self.iterate_items(
+                with_groups=True,
+                traverse_pictures=True,
+                included_content_layers={cl for cl in ContentLayer},
+            )
+        ):
             if isinstance(item, GroupItem):
                 print(
                     " " * level,
                     f"{ix}: {item.label.value} with name={item.name}",
                 )
+            elif isinstance(item, TextItem):
+                print(
+                    " " * level,
+                    f"{ix}: {item.label.value}: {item.text[:min(len(item.text), 100)]}",
+                )
+
             elif isinstance(item, DocItem):
                 print(" " * level, f"{ix}: {item.label.value}")
 
     def export_to_element_tree(self) -> str:
         """Export_to_element_tree."""
         texts = []
-        for ix, (item, level) in enumerate(self.iterate_items(with_groups=True)):
+        for ix, (item, level) in enumerate(
+            self.iterate_items(
+                with_groups=True,
+                traverse_pictures=True,
+                included_content_layers={cl for cl in ContentLayer},
+            )
+        ):
             if isinstance(item, GroupItem):
                 texts.append(
                     " " * level + f"{ix}: {item.label.value} with name={item.name}"
+                )
+            elif isinstance(item, TextItem):
+                texts.append(
+                    " " * level
+                    + f"{ix}: {item.label.value}: {item.text[:min(len(item.text), 100)]}"
                 )
             elif isinstance(item, DocItem):
                 texts.append(" " * level + f"{ix}: {item.label.value}")
